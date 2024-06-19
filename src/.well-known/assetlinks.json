@@ -1,0 +1,11 @@
+[
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "vite_pwa",
+        "package_name": "app.netlify.animated_lollipop_84a197.twa",
+        "sha256_cert_fingerprints": ["80:BB:2D:C0:86:A3:7D:17:9E:12:55:21:91:F4:B8:D5:46:D5:6B:CD:9C:B0:70:C4:27:21:12:39:68:CB:E9:55"]
+      }
+    }
+  ]
+  

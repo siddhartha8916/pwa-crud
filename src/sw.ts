@@ -62,11 +62,14 @@ async function syncUsers() {
   try {
     const syncPromises = users.map(async (user) => {
       try {
-        const response = await fetch("https://pwa-api.brainstacktechnologies.com/users", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(user),
-        });
+        const response = await fetch(
+          "https://pwa-api.brainstacktechnologies.com/users",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(user),
+          }
+        );
 
         console.log("response :>> ", response);
 
@@ -172,7 +175,10 @@ async function handlePostRequest(request: Request): Promise<Response> {
 
       // Update the cache with the new user data
       const cache = await caches.open(USERS_CACHE);
-      const cachedRequest = new Request("https://pwa-api.brainstacktechnologies.com/users", { method: "GET" });
+      const cachedRequest = new Request(
+        "https://pwa-api.brainstacktechnologies.com/users",
+        { method: "GET" }
+      );
       const cachedResponse = await cache.match(cachedRequest);
 
       if (cachedResponse) {
@@ -193,6 +199,7 @@ async function handlePostRequest(request: Request): Promise<Response> {
   }
 }
 
+// TODO : Cache Delete Requests
 async function handleDeleteRequest(request: Request): Promise<Response> {
   try {
     const response = await fetch(request);
@@ -229,3 +236,26 @@ async function handleDeleteRequest(request: Request): Promise<Response> {
     );
   }
 }
+
+// TODO : Push Notifications
+// {
+//   "subject": "mailto: siddhartha6916@gmail.com",
+//   "publicKey": "BCrtLO_-1aOLACVK1Uz1KoPo4w6-ihPZZ39NNRXavx3ebFqMjgCpVy_onCZrYR4Ew30BZMMBGQm5qAoCmhLDVew",
+//   "privateKey": "aCyNzAnUCxep4Kd4AepgR2gfWc8FH2i7aUspupafbN8"
+//   }
+
+// self.addEventListener("activate", async () => {
+//   const subscription = await self.registration.pushManager.subscribe({
+//     userVisibleOnly: true,
+//     applicationServerKey: urlBase64ToUint8Array(
+//       "BCrtLO_-1aOLACVK1Uz1KoPo4w6-ihPZZ39NNRXavx3ebFqMjgCpVy_onCZrYR4Ew30BZMMBGQm5qAoCmhLDVew"
+//     ),
+//   });
+
+//   const response = await saveSubscription(subscription);
+//   console.log(response);
+// });
+
+self.addEventListener("push", (e) => {
+  self.registration.showNotification("Wohoo!!", { body: e?.data?.text() });
+});

@@ -1,13 +1,59 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>vite-project-pwa + TS</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const checkPermission = () => {
+          console.log("Checking Permission :>> ");
+          if (!("Notification" in window)) {
+            throw new Error("No support for notification API");
+          }
+
+          if (!("PushManager" in window)) {
+            throw new Error("No support for Push API");
+          }
+        };
+
+        const requestNotificationPermission = async () => {
+          console.log("Requesting Notification Permission :>> ");
+          const permission = await Notification.requestPermission();
+
+          if (permission !== "granted") {
+            throw new Error("Notification permission not granted");
+          }
+        };
+
+        const requestGeolocationPermission = async () => {
+          console.log("Requesting Geolocation Permission :>> ");
+          const permission = await navigator.permissions.query({ name: "geolocation" });
+        
+          if (permission.state === "granted") {
+            console.log("Geolocation permission granted");
+          } else if (permission.state === "prompt") {
+            console.log("Geolocation permission request prompted");
+            await navigator.geolocation.getCurrentPosition(() => {}, () => {});
+          } else if (permission.state === "denied") {
+            throw new Error("Geolocation permission denied");
+          }
+        };
+
+        const main = async () => {
+          checkPermission();
+          await requestNotificationPermission();
+          await requestGeolocationPermission()
+        };
+
+        main().catch((error) => {
+          console.error("Error in main:", error);
+        });
+      });
+    </script>
   </body>
 </html>
