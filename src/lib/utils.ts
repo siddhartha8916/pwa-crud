@@ -32,3 +32,17 @@ export const urlBase64ToUint8Array = (base64String: string) => {
 
   return outputArray;
 };
+
+export const requestGeolocationPermission = async () => {
+  console.log("Requesting Geolocation Permission :>> ");
+  const permission = await navigator.permissions.query({ name: "geolocation" });
+
+  if (permission.state === "granted") {
+    console.log("Geolocation permission granted");
+  } else if (permission.state === "prompt") {
+    console.log("Geolocation permission request prompted");
+    await navigator.geolocation.getCurrentPosition(() => {}, () => {});
+  } else if (permission.state === "denied") {
+    throw new Error("Geolocation permission denied");
+  }
+};

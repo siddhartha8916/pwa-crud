@@ -14,22 +14,15 @@ import MenuIcon from "../icons/menu";
 import RefreshIcon from "../icons/refresh";
 import { MenuItems } from "@/routes/menu-items";
 import { useState } from "react";
-import { ADDED_USERS_CACHE } from "@/config/constants";
 
 // The layout component for dashboard-related pages.
 const DashboardLayout = () => {
   const outlet = useOutlet();
   const [open, setOpen] = useState(false);
 
-  const handleCachePOSTRequest = async () => {
-    const cache = await caches.open(ADDED_USERS_CACHE);
-    const requests = await cache.keys();
-    console.log(requests);
-  };
-
   return (
     <>
-      <div className="bg-[#a7e8fa] flex items-center justify-start p-5">
+      <div className="bg-[#c1a7fa] flex items-center justify-start p-5">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild className="mr-5">
             <Button variant="outline" className="h-10 w-10 p-0">
@@ -70,13 +63,6 @@ const DashboardLayout = () => {
           </SheetContent>
         </Sheet>{" "}
         <h1 className="text-xl font-medium">PWA Survey App</h1>
-        <Button
-          className="ml-auto"
-          variant={"outline"}
-          onClick={handleCachePOSTRequest}
-        >
-          Sync Data
-        </Button>
         <Button
           variant="outline"
           className="h-10 w-10 p-0 ml-auto"

@@ -10,7 +10,7 @@ import { NavigationRoute, registerRoute } from "workbox-routing";
 import { NetworkFirst } from "workbox-strategies";
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { SYNC_USERS, USER_STORE, USERS_CACHE } from "./config/constants";
-import { registerBackgroundSync } from "./lib/utils";
+import { registerBackgroundSync, urlBase64ToUint8Array } from "./lib/utils";
 import { openDB } from "idb";
 
 declare let self: ServiceWorkerGlobalScope;
@@ -244,17 +244,46 @@ async function handleDeleteRequest(request: Request): Promise<Response> {
 //   "privateKey": "aCyNzAnUCxep4Kd4AepgR2gfWc8FH2i7aUspupafbN8"
 //   }
 
-// self.addEventListener("activate", async () => {
-//   const subscription = await self.registration.pushManager.subscribe({
-//     userVisibleOnly: true,
-//     applicationServerKey: urlBase64ToUint8Array(
-//       "BCrtLO_-1aOLACVK1Uz1KoPo4w6-ihPZZ39NNRXavx3ebFqMjgCpVy_onCZrYR4Ew30BZMMBGQm5qAoCmhLDVew"
-//     ),
-//   });
+const saveSubscription = async (subscription: PushSubscription) => {
+  const response = await fetch(
+    "https://pwa-api.brainstacktechnologies.com/save-subscription",
+    {
+      method: "POST",
+      headers: { "Content-type": "application/json" },
+      body: JSON.stringify(subscription),
+    }
+  );
 
-//   const response = await saveSubscription(subscription);
-//   console.log(response);
-// });
+  return response.json();
+};
+
+async function subscribeUser() {
+  try {
+    if ('serviceWorker' in self && 'PushManager' in self) {
+      const serviceWorkerRegistration = await self.registration;
+      const subscription = await serviceWorkerRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          "BCrtLO_-1aOLACVK1Uz1KoPo4w6-ihPZZ39NNRXavx3ebFqMjgCpVy_onCZrYR4Ew30BZMMBGQm5qAoCmhLDVew"
+        ),
+      });
+
+      // Send the subscription details to the server
+      await saveSubscription(subscription);
+      console.log("User subscribed to push notifications.");
+    } else {
+      console.error("Service Worker or PushManager is not supported.");
+    }
+  } catch (error) {
+    console.error("Error subscribing to push notifications:", error);
+    // Handle specific errors or retry logic if necessary
+  }
+}
+
+self.addEventListener("activate", async () => {
+  console.log('Activating New SW :>> ');
+  await subscribeUser();
+});
 
 self.addEventListener("push", (e) => {
   self.registration.showNotification("Wohoo!!", { body: e?.data?.text() });

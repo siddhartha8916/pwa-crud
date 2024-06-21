@@ -30,24 +30,9 @@
           }
         };
 
-        const requestGeolocationPermission = async () => {
-          console.log("Requesting Geolocation Permission :>> ");
-          const permission = await navigator.permissions.query({ name: "geolocation" });
-        
-          if (permission.state === "granted") {
-            console.log("Geolocation permission granted");
-          } else if (permission.state === "prompt") {
-            console.log("Geolocation permission request prompted");
-            await navigator.geolocation.getCurrentPosition(() => {}, () => {});
-          } else if (permission.state === "denied") {
-            throw new Error("Geolocation permission denied");
-          }
-        };
-
         const main = async () => {
           checkPermission();
           await requestNotificationPermission();
-          await requestGeolocationPermission()
         };
 
         main().catch((error) => {
