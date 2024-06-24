@@ -1,4 +1,10 @@
-import { createContext, useState, Dispatch, ReactNode, useContext } from "react";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  useContext,
+} from "react";
+import { useLocalStorage } from "./use-local-storage";
 
 // Define a type for the context value
 type LanguageContextType = {
@@ -19,7 +25,7 @@ type LanguageProviderProps = {
 
 // Create a Provider component
 export const LanguageProvider = ({ children }: LanguageProviderProps) => {
-  const [language, setLanguage] = useState<string>("hindi"); // Default language is Hindi
+  const [language, setLanguage] = useLocalStorage("preferredLanguage", "hindi");
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage }}>
@@ -29,4 +35,4 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useLanguageContext = () => useContext(LanguageContext)
+export const useLanguageContext = () => useContext(LanguageContext);
