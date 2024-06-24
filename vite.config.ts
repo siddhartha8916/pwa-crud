@@ -21,7 +21,7 @@ export default defineConfig({
       name: 'vite-project-pwa',
       short_name: 'vite_pwa',
       description: 'Vite PWA Project',
-      theme_color: '#b8fadd',
+      theme_color: '#faa7ac',
     },
 
     injectManifest: {

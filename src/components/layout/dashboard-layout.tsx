@@ -22,7 +22,7 @@ const DashboardLayout = () => {
 
   return (
     <>
-      <div className="bg-[#c1a7fa] flex items-center justify-start p-5">
+      <div className="bg-[#faa7ac] flex items-center justify-start p-5">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild className="mr-5">
             <Button variant="outline" className="h-10 w-10 p-0">
