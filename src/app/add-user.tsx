@@ -34,12 +34,17 @@ import {
 import { useAddUser } from "@/services/app-survey";
 import { useRef, useState } from "react";
 import { I_AddUser_Body } from "@/types/user";
+import { useLanguageContext } from "@/context/language-context";
+import { translations } from "@/translation";
 
 const AddUserModule = () => {
+  const { language } = useLanguageContext();
+  const currentLanguage = translations[language];
+
   const { mutateAsync, isPending } = useAddUser();
   const userNameRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<HTMLInputElement>(null);
-  const [userLocation, setUserLocation] = useState("");
+  const [userLocation, setUserLocation] = useState<GeolocationPosition>();
 
   const handleAddUser = async () => {
     const userName = userNameRef?.current!.value;
@@ -73,7 +78,8 @@ const AddUserModule = () => {
       const position = await getCurrentPosition();
       const location = `${position.coords.latitude}, ${position.coords.longitude}`;
       console.log("location :>> ", location);
-      setUserLocation(location);
+      console.log("position", position);
+      setUserLocation(position);
     } catch (error) {
       console.log("error :>> ", error);
       if (error instanceof GeolocationPositionError) {
@@ -131,31 +137,43 @@ const AddUserModule = () => {
   return (
     <div className="grid gap-5">
       <div className="flex w-full items-center space-x-2">
-        <Input ref={userNameRef} type="text" placeholder="Enter User Name" />
+        <Input
+          ref={userNameRef}
+          type="text"
+          placeholder={currentLanguage.userNamePlaceholderText}
+        />
         <Button
           type="button"
           onClick={handleAddUser}
           disabled={isPending}
           className="w-32"
         >
-          {isPending ? "Adding..." : "Add User"}
+          {isPending
+            ? currentLanguage.userNameAddingButtonText
+            : currentLanguage.userNameAddButtonText}
         </Button>
       </div>
       <div className="flex w-full items-center space-x-2">
         <Input
           ref={userLocationRef}
           type="text"
-          placeholder="Enter Location"
+          placeholder={currentLanguage.userLocationPlaceholderText}
           disabled
-          value={userLocation}
+          value={
+            userLocation?.coords
+              ? `${userLocation?.coords.latitude}, ${userLocation?.coords.longitude}`
+              : ""
+          }
         />
         <Button type="button" onClick={getUserLocation} className="w-32">
-          Get Location
+          {currentLanguage.userLocationButtonText}
         </Button>
       </div>
 
+      <p>{JSON.stringify(userLocation, null, 4)}</p>
+
       <Button type="button" onClick={subscribeUser}>
-        Enable Push Notification Subscription
+        {currentLanguage.pushNotificationButtonText}
       </Button>
     </div>
   );

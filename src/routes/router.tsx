@@ -1,3 +1,4 @@
+import LanguageSelectionComponent from "@/app/language-selection";
 import UserPage from "@/app/user";
 import DashboardLayout from "@/components/layout/dashboard-layout";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -9,8 +10,8 @@ const Router = () => {
       {/* ====================== App Routes ====================== */}
 
       <Route path="/" element={<DashboardLayout />}>
-        <Route index element={<UserPage />} />
-        <Route path="users" element={<>User</>} />
+        <Route index element={<LanguageSelectionComponent />} />
+        <Route path="users" element={<UserPage />} />
         <Route path="user-profile" element={<>User Profile</>} />
       </Route>
 

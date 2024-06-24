@@ -14,15 +14,18 @@ import MenuIcon from "../icons/menu";
 import RefreshIcon from "../icons/refresh";
 import { MenuItems } from "@/routes/menu-items";
 import { useState } from "react";
+import { useLanguageContext } from "@/context/language-context";
+import { translations } from "@/translation";
 
 // The layout component for dashboard-related pages.
 const DashboardLayout = () => {
   const outlet = useOutlet();
   const [open, setOpen] = useState(false);
+  const {language} = useLanguageContext()
 
   return (
     <>
-      <div className="bg-[#faa7ac] flex items-center justify-start p-5">
+      <div className="bg-[#a7ebfa] flex items-center justify-start p-5">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild className="mr-5">
             <Button variant="outline" className="h-10 w-10 p-0">
@@ -62,7 +65,7 @@ const DashboardLayout = () => {
             </SheetFooter>
           </SheetContent>
         </Sheet>{" "}
-        <h1 className="text-xl font-medium">PWA Survey App</h1>
+        <h1 className="text-xl font-medium">{translations[language].applicationName}</h1>
         <Button
           variant="outline"
           className="h-10 w-10 p-0 ml-auto"
