@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SYNC_USERS } from "@/config/constants";
-import { registerBackgroundSync, requestGeolocationPermission, urlBase64ToUint8Array } from "@/lib/utils";
+import {
+  registerBackgroundSync,
+  requestGeolocationPermission,
+  urlBase64ToUint8Array,
+} from "@/lib/utils";
 
 // async function addUser(userData) {
 //   try {
@@ -65,7 +69,7 @@ const AddUserModule = () => {
   const getUserLocation = async () => {
     console.log("Getting User Location :>> ");
     try {
-      await requestGeolocationPermission()
+      await requestGeolocationPermission();
       const position = await getCurrentPosition();
       const location = `${position.coords.latitude}, ${position.coords.longitude}`;
       console.log("location :>> ", location);
@@ -74,7 +78,7 @@ const AddUserModule = () => {
       console.log("error :>> ", error);
       if (error instanceof GeolocationPositionError) {
         if (error.code === 1) {
-          alert(error.message)
+          alert(error.message);
         }
       }
     }
@@ -83,7 +87,10 @@ const AddUserModule = () => {
   // Function to get current position using Geolocation API
   const getCurrentPosition = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+      });
     });
   };
 
