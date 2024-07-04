@@ -26,3 +26,9 @@ export const deleteUser = async ({
   });
   return data;
 };
+
+
+export const getPublicKey = async (): Promise<I_User[]> => {
+  const { data } = await applicationClient.get(apiPaths.PUBLIC_KEY);
+  return data;
+};

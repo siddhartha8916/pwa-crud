@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SYNC_USERS } from "@/config/constants";
+// import { SYNC_USERS } from "@/config/constants";
 import {
-  registerBackgroundSync,
+  encryptDataWithRSA,
+  getPublicKeyFromCache,
+  importPublicKey,
+  // registerBackgroundSync,
   requestGeolocationPermission,
   urlBase64ToUint8Array,
 } from "@/lib/utils";
@@ -54,8 +57,18 @@ const AddUserModule = () => {
       return;
     }
 
+    const publicKey = await getPublicKeyFromCache();
+    const publicKeyParsed = await importPublicKey(publicKey);
+
+    // Encode the data :
+    const encryptedTimestamp = await encryptDataWithRSA(
+      Date.now().toString(),
+      publicKeyParsed
+    );
+
     const newUser: I_AddUser_Body = {
       name: userName,
+      timestamp: encryptedTimestamp,
     };
 
     try {
@@ -67,7 +80,7 @@ const AddUserModule = () => {
     } catch (error) {
       alert("Failed to add user");
       console.log("error :>> ", error);
-      registerBackgroundSync(SYNC_USERS);
+      // registerBackgroundSync(SYNC_USERS);
     }
   };
 
