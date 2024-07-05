@@ -80,11 +80,15 @@ const AddUserModule = () => {
   };
 
   const saveSubscription = async (subscription: PushSubscription) => {
+    const appSecret = await getApplicationSecret();
     const response = await fetch(
       "https://pwa-api.brainstacktechnologies.com/save-subscription",
       {
         method: "POST",
-        headers: { "Content-type": "application/json" },
+        headers: {
+          "Content-type": "application/json",
+          "X-Custom-Header": appSecret,
+        },
         body: JSON.stringify(subscription),
       }
     );
