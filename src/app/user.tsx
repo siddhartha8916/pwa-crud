@@ -1,7 +1,6 @@
 import {
   useDeleteUser,
   useGetAllUsers,
-  useGetPublicKey,
 } from "@/services/app-survey";
 import AddUserModule from "./add-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +9,9 @@ import { Button } from "@/components/ui/button";
 import DeleteIcon from "@/components/icons/delete";
 import { registerBackgroundSync } from "@/lib/utils";
 import { SYNC_USERS } from "@/config/constants";
-import { useEffect } from "react";
 
 const UserPage = () => {
   const { data } = useGetAllUsers();
-  const { data: publicKey } = useGetPublicKey();
   console.log("data :>> ", data);
   const { mutateAsync: deleteUser } = useDeleteUser();
 
@@ -32,11 +29,6 @@ const UserPage = () => {
       registerBackgroundSync(SYNC_USERS);
     }
   };
-
-  useEffect(() => {
-    console.log("publicKey", publicKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div>

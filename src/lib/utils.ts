@@ -1,7 +1,6 @@
-import { PUBLIC_KEY_CACHE_NAME } from "@/config/constants";
-import { I_PublicKeyResponse } from "@/types/user";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { APPLICATION_CACHE, PUBLIC_KEY } from "@/config/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -64,12 +63,12 @@ function uint8ArrayToBase64(uint8Array: Uint8Array): string {
 // Utility to get publicKey from text converted to CryptoKey format
 export async function importPublicKey(publicKeyPEM: string) {
   // Trim PEM header and footer if present
-  const pemHeader = '-----BEGIN PUBLIC KEY-----';
-  const pemFooter = '-----END PUBLIC KEY-----';
+  const pemHeader = "-----BEGIN PUBLIC KEY-----";
+  const pemFooter = "-----END PUBLIC KEY-----";
   const pemContents = publicKeyPEM
-    .replace(pemHeader, '')
-    .replace(pemFooter, '')
-    .replace(/\r\n/g, '')
+    .replace(pemHeader, "")
+    .replace(pemFooter, "")
+    .replace(/\r\n/g, "")
     .trim();
 
   // Base64 decode the PEM contents
@@ -83,34 +82,34 @@ export async function importPublicKey(publicKeyPEM: string) {
 
   // Import the public key
   const publicKey = await crypto.subtle.importKey(
-    'spki', // Public key import format
+    "spki", // Public key import format
     publicKeyBuffer,
     {
-      name: 'RSA-OAEP',
-      hash: { name: 'SHA-256' },
+      name: "RSA-OAEP",
+      hash: { name: "SHA-256" },
     },
     true, // Whether the key is extractable (i.e., can be used in exportKey)
-    ['encrypt'] // Key usages
+    ["encrypt"] // Key usages
   );
 
   return publicKey;
 }
 
 // Utility function to encrypt data with RSA-OAEP and convert to Base64
-export async function encryptDataWithRSA(
-  sensitiveData: string,
-  publicKey: CryptoKey
-): Promise<string> {
+async function encryptDataWithRSA(data: string): Promise<string> {
   try {
+    const publicKey = PUBLIC_KEY;
+    const publicKeyParsed = await importPublicKey(publicKey);
+
     // Encode sensitive data
-    const encodedData = new TextEncoder().encode(sensitiveData);
+    const encodedData = new TextEncoder().encode(data);
 
     // Encrypt with RSA-OAEP
     const encrypted = await crypto.subtle.encrypt(
       {
         name: "RSA-OAEP",
       },
-      publicKey,
+      publicKeyParsed,
       encodedData
     );
 
@@ -125,18 +124,24 @@ export async function encryptDataWithRSA(
   }
 }
 
-export const getPublicKeyFromCache = async () : Promise<string> => {
-  // Get public Key from cache
-  const cache = await caches.open(PUBLIC_KEY_CACHE_NAME);
-  const cachedRequest = new Request(
-    "https://pwa-api.brainstacktechnologies.com/public-key",
-    { method: "GET" }
-  );
-  const cachedResponse = await cache.match(cachedRequest);
+async function getApplicationRandomUUID() {
+  // Update the cache with the new user data
+  const cache = await caches.open(APPLICATION_CACHE);
+  const cachedResponse = await cache.match("/uuid");
   if (cachedResponse) {
-    const cachedData: I_PublicKeyResponse = await cachedResponse.json();
-    return cachedData.publicKey
+    const uuid = await cachedResponse.text();
+    return uuid;
   } else {
-    throw new Error("Public key not found");
+    const uuid = self.crypto.randomUUID();
+    cache.put("/uuid", new Response(uuid));
+    return uuid;
   }
+}
+
+export const getApplicationSecret = async () => {
+  const uuid = await getApplicationRandomUUID();
+  const encryptedData = await encryptDataWithRSA(
+    `${uuid}_${Date.now().toString()}`
+  );
+  return encryptedData;
 };

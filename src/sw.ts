@@ -8,12 +8,11 @@ import {
 } from "workbox-precaching";
 import { clientsClaim } from "workbox-core";
 import { NavigationRoute, registerRoute } from "workbox-routing";
-import { NetworkFirst, CacheFirst } from "workbox-strategies";
+import { NetworkFirst } from "workbox-strategies";
 import { Queue } from "workbox-background-sync";
-// import { encryptDataWithRSA, urlBase64ToUint8Array } from "./lib/utils";
-import { PUBLIC_KEY_CACHE_NAME, USERS_CACHE } from "./config/constants";
-import { I_AddUser_Body, I_PublicKeyResponse } from "./types/user";
-import { encryptDataWithRSA, getPublicKeyFromCache, importPublicKey } from "./lib/utils";
+import { USERS_CACHE } from "./config/constants";
+import { I_AddUser_Body } from "./types/user";
+import { getApplicationSecret } from "./lib/utils";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -33,19 +32,20 @@ const newAddedUsersQueue = new Queue("new-added-users", {
     while ((entry = await queue.shiftRequest())) {
       const body: I_AddUser_Body = await entry.request.json();
 
-      const publicKey = await getPublicKeyFromCache()
-      const publicKeyParsed = await importPublicKey(publicKey)
-
       // Encode the data :
-      const encryptedTimestamp = await encryptDataWithRSA(Date.now().toString(), publicKeyParsed)
+      const encryptedTimestamp = await getApplicationSecret();
 
       // Update timestamp to current time
       body.timestamp = encryptedTimestamp; // Updating timestamp to current time
 
+      // Add custom header here
+      const headers = new Headers(entry.request.headers);
+      headers.set("X-Custom-Header", encryptedTimestamp);
+
       // Create a new request with updated body
       const updatedRequest = new Request(entry.request.url, {
         method: entry.request.method,
-        headers: entry.request.headers,
+        headers: headers,
         body: JSON.stringify(body),
       });
 
@@ -75,15 +75,6 @@ registerRoute(
   },
   new NetworkFirst({
     cacheName: USERS_CACHE,
-  })
-);
-
-registerRoute(
-  ({ url, request }) => {
-    return url.pathname.startsWith("/public-key") && request.method === "GET";
-  },
-  new CacheFirst({
-    cacheName: PUBLIC_KEY_CACHE_NAME,
   })
 );
 

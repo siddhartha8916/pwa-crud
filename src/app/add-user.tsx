@@ -2,37 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 // import { SYNC_USERS } from "@/config/constants";
 import {
-  encryptDataWithRSA,
-  getPublicKeyFromCache,
-  importPublicKey,
+  getApplicationSecret,
   // registerBackgroundSync,
   requestGeolocationPermission,
   urlBase64ToUint8Array,
 } from "@/lib/utils";
-
-// async function addUser(userData) {
-//   try {
-//     const response = await fetch("/users", {
-//       method: "POST",
-//       body: JSON.stringify(userData),
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
-
-//     // Handle response
-//     if (!response.ok) {
-//       throw new Error("Failed to add user.");
-//     }
-
-//     const result = await response.json();
-//     // Handle result as needed
-//   } catch (error) {
-//     console.error("Failed to add user:", error);
-//     // Register sync event to sync added users when online
-//     await registerBackgroundSync(SYNC_USERS);
-//   }
-// }
 
 import { useAddUser } from "@/services/app-survey";
 import { useRef, useState } from "react";
@@ -57,14 +31,8 @@ const AddUserModule = () => {
       return;
     }
 
-    const publicKey = await getPublicKeyFromCache();
-    const publicKeyParsed = await importPublicKey(publicKey);
-
     // Encode the data :
-    const encryptedTimestamp = await encryptDataWithRSA(
-      Date.now().toString(),
-      publicKeyParsed
-    );
+    const encryptedTimestamp = await getApplicationSecret();
 
     const newUser: I_AddUser_Body = {
       name: userName,
@@ -75,12 +43,10 @@ const AddUserModule = () => {
       await mutateAsync({
         body: newUser,
       });
-      //   alert("User added successfully");
       userNameRef.current.value = "";
     } catch (error) {
       alert("Failed to add user");
       console.log("error :>> ", error);
-      // registerBackgroundSync(SYNC_USERS);
     }
   };
 
