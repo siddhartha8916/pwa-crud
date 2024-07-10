@@ -142,3 +142,136 @@ export const householdMembersQuestion = {
     // Repeat for each household member up to the maximum defined in hh_members_quantity
   ],
 };
+
+export type QuestionTypeDynamic = {
+  id: number;
+  question: string;
+  type: string;
+  options?: string[];
+  validationRule: number;
+  instructions: string;
+  nextQuestionId?: number | null;
+  prevQuestionId: number | null;
+  conditions?: {
+    showIf: string;
+    nextQuestionId: number;
+    elseQuestionId: number;
+  };
+};
+
+export const validationRule = {
+  1: "Only Numbers without Decimal",
+  2: "Only Numbers with Decimal",
+  3: "Only Alphabets",
+  4: "Only Alphabets With Spaces",
+  5: "Only Alphabets and Numbers",
+  6: "Only Alphabets and Numbers With Spaces",
+  7: "Any Charcter Input",
+  8: "Email Validation",
+};
+
+export const household_eng_dynamic: QuestionTypeDynamic[] = [
+  {
+    id: 1,
+    question: "What is your age?",
+    type: "number",
+    validationRule: 1,
+    instructions: "Please enter your age in numbers...",
+    nextQuestionId: 2,
+    prevQuestionId: null,
+  },
+  {
+    id: 2,
+    question: "Do you have children?",
+    instructions: "Please enter Do you have children...",
+    type: "single-select",
+    validationRule: 7,
+    options: ["Yes", "No"],
+    prevQuestionId: 1,
+    conditions: {
+      showIf: "Yes",
+      nextQuestionId: 3,
+      elseQuestionId: 5,
+    },
+  },
+  {
+    id: 3,
+    question: "How many children do you have?",
+    instructions: "Please enter How many children do you have...",
+    type: "number",
+    validationRule: 1,
+    nextQuestionId: 4,
+    prevQuestionId: 2,
+  },
+  {
+    id: 4,
+    question: "What are their ages?",
+    instructions: "Please enter children's ages?...",
+    type: "text",
+    validationRule: 1,
+    nextQuestionId: 5,
+    prevQuestionId: 2,
+  },
+  {
+    id: 5,
+    question: "Do you own a pet?",
+    instructions: "Please enter Do you own a pet...",
+    type: "single-select",
+    options: ["Yes", "No"],
+    validationRule: 7,
+    prevQuestionId: 2,
+    conditions: {
+      showIf: "Yes",
+      nextQuestionId: 6,
+      elseQuestionId: 8,
+    },
+  },
+  {
+    id: 6,
+    question: "What kind of pet(s) do you have?",
+    instructions: "Please enter What kind of pet(s) do you have...",
+    type: "multi-select",
+    options: ["Dog", "Cat", "Bird", "Other"],
+    validationRule: 4,
+    prevQuestionId: 5,
+    nextQuestionId: 7,
+  },
+  {
+    id: 7,
+    question: "How old is your pet?",
+    instructions: "Please enter How old is your pet...",
+    type: "number",
+    validationRule: 1,
+    prevQuestionId: 6,
+    nextQuestionId: 8,
+  },
+  {
+    id: 8,
+    question: "Enter your email address:",
+    instructions: "Please enter your email address...",
+    type: "text",
+    prevQuestionId: 5,
+    validationRule: 8,
+    nextQuestionId: 9,
+  },
+  {
+    id: 9,
+    question: "Which languages do you speak?",
+    instructions: "Please select all that apply...",
+    type: "multi-select",
+    options: ["English", "Spanish", "French", "German", "Other"],
+    validationRule: 7,
+    prevQuestionId: 8,
+    nextQuestionId: 10,
+  },
+  {
+    id: 10,
+    question: "Which hobbies do you enjoy?",
+    instructions: "Please select all that apply...",
+    type: "multi-select",
+    options: ["Reading", "Sports", "Cooking", "Gardening", "Traveling"],
+    validationRule: 7,
+    prevQuestionId: 9,
+    nextQuestionId: null,
+  },
+];

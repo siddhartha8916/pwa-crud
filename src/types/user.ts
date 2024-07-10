@@ -12,3 +12,8 @@ export interface I_AddUser_Body {
 export interface I_PublicKeyResponse {
   publicKey: string;
 }
+
+export type Option = {
+  value: number | string;
+  label: string;
+};

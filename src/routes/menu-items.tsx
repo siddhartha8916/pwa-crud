@@ -13,6 +13,11 @@ export const MenuItems: NavLinkProps[] = [
     subMenus: [],
   },
   {
+    title: "Dynamic Survey",
+    icon: <></>,
+    link: "/dynamic-survey",
+  },
+  {
     title: "Users",
     icon: <></>,
     link: "/users",
