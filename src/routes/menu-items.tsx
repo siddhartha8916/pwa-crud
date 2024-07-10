@@ -7,9 +7,9 @@ export type NavLinkProps = {
 // eslint-disable-next-line react-refresh/only-export-components
 export const MenuItems: NavLinkProps[] = [
   {
-    title: "Dashboard",
+    title: "Survey",
     icon: <></>,
-    link: "/dashboard",
+    link: "/survey",
     subMenus: [],
   },
   {

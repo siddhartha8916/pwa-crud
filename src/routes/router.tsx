@@ -1,3 +1,4 @@
+import AddSurvey from "@/app/add-survey";
 import LanguageSelectionComponent from "@/app/language-selection";
 import UserPage from "@/app/user";
 import DashboardLayout from "@/components/layout/dashboard-layout";
@@ -13,6 +14,7 @@ const Router = () => {
         <Route index element={<LanguageSelectionComponent />} />
         <Route path="users" element={<UserPage />} />
         <Route path="user-profile" element={<>User Profile</>} />
+        <Route path="survey" element={<AddSurvey />} />
       </Route>
 
       {/* If no matching route is found, redirect to the dashboard */}

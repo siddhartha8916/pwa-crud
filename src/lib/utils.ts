@@ -145,3 +145,12 @@ export const getApplicationSecret = async () => {
   );
   return encryptedData;
 };
+
+export const getCurrentPosition = (): Promise<GeolocationPosition> => {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+    });
+  });
+};
