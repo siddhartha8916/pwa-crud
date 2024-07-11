@@ -92,7 +92,53 @@ const DynamicQuestionnaire = () => {
             }}
           />
         );
+      case "single-select-others":
+        return (
+          <AppCreateableReactSelect
+            options={
+              question.options?.map((item) => ({ label: item, value: item })) ||
+              []
+            }
+            label=""
+            isOptionsLoading={false}
+            placeholder={question.question}
+            selectType="single"
+            direction="column"
+            className="col-span-2 -mt-1"
+            selected={
+              responsesData[question.id]
+                ? (responsesData[question.id] as Option[])
+                : null
+            }
+            setSelected={(value) => {
+              handleInputChange(question.id, value, setResponseData);
+            }}
+          />
+        );
       case "multi-select":
+        return (
+          <AppFormReactSelect
+            options={
+              question.options?.map((item) => ({ label: item, value: item })) ||
+              []
+            }
+            label=""
+            isOptionsLoading={false}
+            placeholder={question.question}
+            selectType="multi"
+            direction="column"
+            className="col-span-2 -mt-1"
+            selected={
+              responsesData[question.id]
+                ? (responsesData[question.id] as Option[])
+                : null
+            }
+            setSelected={(value) => {
+              handleInputChange(question.id, value, setResponseData);
+            }}
+          />
+        );
+      case "multi-select-others":
         return (
           <AppCreateableReactSelect
             options={

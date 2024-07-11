@@ -67,9 +67,9 @@ const AppCreateableReactSelect = (props: Props) => {
   const isSelectAllSelected = () =>
     valueRef.current.length === props.options.length &&
     props.options.length > 1;
-  const isOptionSelected = (option: Option) =>
-    valueRef.current.some(({ value }) => value === option.value) ||
-    isSelectAllSelected();
+//   const isOptionSelected = (option: Option) =>
+//     valueRef.current.some(({ value }) => value === option?.value) ||
+//     isSelectAllSelected();
 
   //const getOptions = () => isSelectAllSelected() ? [] : [selectAllOption, ...props.options];
   const getOptions = () =>
@@ -180,7 +180,7 @@ const AppCreateableReactSelect = (props: Props) => {
   return (
     <CreatableSelect
       isClearable
-      isOptionSelected={isOptionSelected}
+    //   isOptionSelected={isOptionSelected}
       className={cn(
         "w-full rounded-md border border-input text-sm shadow-sm transition-colors placeholder:text-muted-foreground",
         props.className
