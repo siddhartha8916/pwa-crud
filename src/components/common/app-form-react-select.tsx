@@ -38,7 +38,7 @@ export type Option = {
 };
 
 const reactSelectCustomStyles = {
-  control: (provided: any, state: any) => ({
+  control: (_provided: any, state: any) => ({
     display: "flex",
     height: "auto",
     borderRadius: "5px",

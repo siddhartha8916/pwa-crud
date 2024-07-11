@@ -157,6 +157,8 @@ export type QuestionTypeDynamic = {
     nextQuestionId: number;
     elseQuestionId: number;
   };
+  repeatFlag?: boolean;
+  questionsToRepeat?: QuestionTypeDynamic[];
 };
 
 export const validationRule = {
@@ -272,6 +274,45 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     options: ["Reading", "Sports", "Cooking", "Gardening", "Traveling"],
     validationRule: 7,
     prevQuestionId: 9,
+    nextQuestionId: 11,
+  },
+  {
+    id: 11,
+    question: "How many household members are there?",
+    instructions: "Please enter household members number...",
+    type: "number",
+    validationRule: 1,
+    prevQuestionId: 10,
+    nextQuestionId: 12,
+    questionsToRepeat: [
+      {
+        id: 111,
+        question: "What is the name?",
+        type: "text",
+        validationRule: 1,
+        instructions: "Please enter the member name...",
+        prevQuestionId: null,
+        nextQuestionId: 222,
+      },
+      {
+        id: 222,
+        question: "What is the age?",
+        type: "number",
+        validationRule: 1,
+        instructions: "Please enter the member age...",
+        prevQuestionId: 111,
+        nextQuestionId: null,
+      },
+    ],
+  },
+  {
+    id: 12,
+    question: "Which books do you read?",
+    instructions: "Please select all that apply...",
+    type: "multi-select",
+    options: ["Comic", "Horror", "Thriller", "Sci-Fi", "Others"],
+    validationRule: 7,
+    prevQuestionId: 11,
     nextQuestionId: null,
   },
 ];

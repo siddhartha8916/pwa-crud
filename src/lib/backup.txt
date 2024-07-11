@@ -1,0 +1,98 @@
+  const handleNextRepeatQuestion = (question?: QuestionTypeDynamic) => {
+    if (question) {
+      // If question contains based on some condition skip to else Question Id
+      if (question.conditions) {
+        if (question.conditions.showIf === responses[question.id]) {
+          const next = repeatQuestions?.find(
+            (item) => item.id === question?.conditions?.nextQuestionId
+          );
+          if (next) {
+            setCurrentRepeatQuestions(next);
+          } else {
+            if (repeatCount > 1) {
+              setCurrentRepeatQuestions(repeatQuestions?.[0]);
+              setRepeatCount((prevCount) => prevCount - 1);
+            } else {
+              setCurrentRepeatQuestions(undefined);
+              setRepeatCount(0);
+              setOpen(false);
+              const next = household_eng_dynamic?.find(
+                (item) => item.id === currentQuestion?.nextQuestionId
+              );
+              if (next) {
+                setCurrentQuestion(next);
+              }
+            }
+          }
+        } else {
+          const next = repeatQuestions?.find(
+            (item) => item.id === question?.conditions?.elseQuestionId
+          );
+          if (next) {
+            setCurrentRepeatQuestions(next);
+          } else {
+            if (repeatCount > 1) {
+              setCurrentRepeatQuestions(repeatQuestions?.[0]);
+              setRepeatCount((prevCount) => prevCount - 1);
+            } else {
+              setCurrentRepeatQuestions(undefined);
+              setRepeatCount(0);
+              setOpen(false);
+              const next = household_eng_dynamic?.find(
+                (item) => item.id === currentQuestion?.nextQuestionId
+              );
+              if (next) {
+                setCurrentQuestion(next);
+              }
+            }
+          }
+        }
+        // If we donot have conditions then just set the next question id
+      } else {
+        const next = repeatQuestions?.find(
+          (item) => item.id === question?.nextQuestionId
+        );
+        console.log("repeatQuestions", repeatQuestions);
+
+        if (next) {
+          setCurrentRepeatQuestions(next);
+        } else {
+          if (repeatCount > 1) {
+            setCurrentRepeatQuestions(repeatQuestions?.[0]);
+            setRepeatCount((prevCount) => prevCount - 1);
+          } else {
+            setCurrentRepeatQuestions(undefined);
+            setRepeatCount(0);
+            setOpen(false);
+            const next = household_eng_dynamic?.find(
+              (item) => item.id === currentQuestion?.nextQuestionId
+            );
+            if (next) {
+              setCurrentQuestion(next);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  const handlePrevRepeatQuestion = (question?: QuestionTypeDynamic) => {
+    if (question) {
+      if (!question?.prevQuestionId) {
+        return;
+      }
+      const prev = repeatQuestions?.find(
+        (item) => item.id === question.prevQuestionId
+      );
+      if (prev) {
+        setCurrentRepeatQuestions(prev);
+      }
+    }
+  };
+
+  setResponses((prevData) => {
+    return {
+      ...prevData,
+      [currentQuestion.id]: [...prevData[currentQuestion.id] as Response[], repeatQuestionsResponse],
+    };
+  });

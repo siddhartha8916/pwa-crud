@@ -1,9 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Input } from "@/components/ui/input";
 import {
   household_eng_dynamic,
   QuestionTypeDynamic,
 } from "@/data/household_module/household_eng";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 import {
   Select,
   SelectContent,
@@ -26,27 +33,47 @@ import {
 import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { Option } from "@/types/user";
 
-
-
+type Response = {
+  [key: number]: string | number | Option[] | Response[];
+};
 
 const DynamicQuestionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
     household_eng_dynamic[0]
   );
-  const [responses, setResponses] = useState<{
-    [key: number]: string | number | Option[];
-  }>({});
+  const [repeatQuestions, setRepeatQuestions] =
+    useState<QuestionTypeDynamic[]>();
+  const [repeatQuestionsResponse, setRepeatQuestionsResponse] =
+    useState<Response>({});
+  const [currentRepeatQuestion, setCurrentRepeatQuestion] =
+    useState<QuestionTypeDynamic>();
+  const [repeatCount, setRepeatCount] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [repeatQuestionResponseArray, setRepeatQuestionResponseArray] =
+    useState<Response[]>([]);
+  // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
 
-  const renderQuestion = (question: QuestionTypeDynamic) => {
+  const [responses, setResponses] = useState<Response>({});
+  // console.log("repeatQuestionsResponse", repeatQuestionsResponse);
+  // console.log("repeatCount", repeatCount);
+  const renderQuestion = (
+    question: QuestionTypeDynamic,
+    responsesData: Response,
+    setResponseData: React.Dispatch<React.SetStateAction<Response>>
+  ) => {
     switch (question.type) {
       case "number":
       case "text":
         return (
           <Input
-            id={currentQuestion.id.toString()}
-            value={responses[currentQuestion.id] as string || ""}
+            id={question.id.toString()}
+            value={(responsesData[question.id] as string) || ""}
             onChange={(event) =>
-              handleInputChange(currentQuestion.id, event.target.value)
+              handleInputChange(
+                question.id,
+                event.target.value,
+                setResponseData
+              )
             }
           />
         );
@@ -54,9 +81,9 @@ const DynamicQuestionnaire = () => {
         return (
           <Select
             onValueChange={(value) =>
-              handleInputChange(currentQuestion.id, value)
+              handleInputChange(question.id, value, setResponseData)
             }
-            defaultValue={responses[currentQuestion?.id]?.toString() || ""}
+            defaultValue={responsesData[question?.id]?.toString() || ""}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={question.question} />
@@ -89,10 +116,12 @@ const DynamicQuestionnaire = () => {
             direction="column"
             className="col-span-2 -mt-1"
             selected={
-              responses[currentQuestion.id] ? responses[currentQuestion.id] as Option[] : null
+              responsesData[question.id]
+                ? (responsesData[question.id] as Option[])
+                : null
             }
             setSelected={(value) => {
-              handleInputChange(currentQuestion.id, value);
+              handleInputChange(question.id, value, setResponseData);
             }}
           />
         );
@@ -101,31 +130,43 @@ const DynamicQuestionnaire = () => {
     }
   };
 
-  const handleInputChange = (id: number, value: string) => {
-    setResponses((prevData) => ({ ...prevData, [id]: value }));
+  const handleInputChange = (
+    id: number,
+    value: string,
+    setResponseData: React.Dispatch<React.SetStateAction<Response>>
+  ) => {
+    setResponseData((prevData) => ({ ...prevData, [id]: value }));
   };
 
-  const handleNextQuestion = (currentQuestion: QuestionTypeDynamic) => {
+  const handleNextQuestion = (question: QuestionTypeDynamic) => {
     // Dont do anything if next question id is null
+    if (!question?.nextQuestionId && !question?.conditions?.nextQuestionId) {
+      return;
+    }
+
     if (
-      !currentQuestion?.nextQuestionId &&
-      !currentQuestion?.conditions?.nextQuestionId
+      question.questionsToRepeat &&
+      typeof responses[question.id] !== "object"
     ) {
+      setRepeatCount(responses[question.id] as number);
+      setRepeatQuestions(question?.questionsToRepeat);
+      setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
+      setOpen(true);
       return;
     }
 
     // If we have some conditions then based on that navigate to either next question or else question
-    if (currentQuestion.conditions) {
-      if (currentQuestion.conditions.showIf === responses[currentQuestion.id]) {
+    if (question.conditions) {
+      if (question.conditions.showIf === responses[question.id]) {
         const next = household_eng_dynamic.find(
-          (item) => item.id === currentQuestion?.conditions?.nextQuestionId
+          (item) => item.id === question?.conditions?.nextQuestionId
         );
         if (next) {
           setCurrentQuestion(next);
         }
       } else {
         const next = household_eng_dynamic.find(
-          (item) => item.id === currentQuestion?.conditions?.elseQuestionId
+          (item) => item.id === question?.conditions?.elseQuestionId
         );
         if (next) {
           setCurrentQuestion(next);
@@ -134,7 +175,7 @@ const DynamicQuestionnaire = () => {
       // If we donot have conditions then just set the next question id
     } else {
       const next = household_eng_dynamic.find(
-        (item) => item.id === currentQuestion?.nextQuestionId
+        (item) => item.id === question?.nextQuestionId
       );
       if (next) {
         setCurrentQuestion(next);
@@ -142,20 +183,75 @@ const DynamicQuestionnaire = () => {
     }
   };
 
-  const handlePrevQuestion = (currentQuestion: QuestionTypeDynamic) => {
-    setResponses((prevData) => ({ ...prevData, [currentQuestion.id]: "" }));
-    if (!currentQuestion?.prevQuestionId) {
+  const handlePrevQuestion = (question: QuestionTypeDynamic) => {
+    setResponses((prevData) => ({ ...prevData, [question.id]: "", [question.prevQuestionId!]:"" }));
+    if (!question?.prevQuestionId) {
       return;
     }
     const prev = household_eng_dynamic.find(
-      (item) => item.id === currentQuestion.prevQuestionId
+      (item) => item.id === question.prevQuestionId
     );
     if (prev) {
       setCurrentQuestion(prev);
     }
   };
 
-  console.log("responses", responses);
+  const handleNextRepeatQuestion = (question?: QuestionTypeDynamic) => {
+    if (question) {
+      const next = repeatQuestions?.find(
+        (item) => item.id === question?.nextQuestionId
+      );
+      if (next) {
+        setCurrentRepeatQuestion(next);
+      }
+
+      if (!next && repeatQuestions?.length) {
+        setRepeatCount((prevCount) => prevCount - 1);
+
+        if (repeatCount <= (responses[currentQuestion.id] as number)) {
+          setCurrentRepeatQuestion(repeatQuestions?.[0]);
+          setRepeatQuestionResponseArray((prevData) => [
+            ...(prevData as Response[]),
+            repeatQuestionsResponse,
+          ]);
+          setRepeatQuestionsResponse({});
+        }
+
+        if (repeatCount === 1) {
+          setCurrentRepeatQuestion(undefined);
+          setRepeatCount(0);
+          setOpen(false);
+          const next = household_eng_dynamic?.find(
+            (item) => item.id === currentQuestion?.nextQuestionId
+          );
+          if (next) {
+            setCurrentQuestion(next);
+          }
+          setResponses((prevData) => {
+            return {
+              ...prevData,
+              [currentQuestion.id]: [...repeatQuestionResponseArray, repeatQuestionsResponse],
+            };
+          });
+          setRepeatQuestionResponseArray([])
+        }
+      }
+    }
+  };
+
+  const handlePrevRepeatQuestion = (question?: QuestionTypeDynamic) => {
+    if (question) {
+      //
+      const prev = repeatQuestions?.find(
+        (item) => item.id === question?.prevQuestionId
+      );
+      if (prev) {
+        setCurrentRepeatQuestion(prev);
+      }
+    }
+  };
+
+  // console.log("responses", responses);
 
   return (
     <div>
@@ -167,7 +263,7 @@ const DynamicQuestionnaire = () => {
             {currentQuestion.instructions}
           </CardDescription>
           <div className="grid w-full items-center gap-1.5 mt-5">
-            {renderQuestion(currentQuestion)}
+            {renderQuestion(currentQuestion, responses, setResponses)}
           </div>
         </CardHeader>
         <CardFooter className="flex items-center justify-between mt-5">
@@ -185,6 +281,39 @@ const DynamicQuestionnaire = () => {
           </Button>
         </CardFooter>
       </Card>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{currentRepeatQuestion?.question}</DialogTitle>
+            <DialogDescription>
+              {currentRepeatQuestion?.instructions}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {currentRepeatQuestion &&
+              renderQuestion(
+                currentRepeatQuestion,
+                repeatQuestionsResponse,
+                setRepeatQuestionsResponse
+              )}
+          </div>
+          <div className="flex items-center justify-between w-full">
+            <Button
+              type="button"
+              onClick={() => handlePrevRepeatQuestion(currentRepeatQuestion)}
+            >
+              Prev
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleNextRepeatQuestion(currentRepeatQuestion)}
+            >
+              Next
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Button
         type="submit"
