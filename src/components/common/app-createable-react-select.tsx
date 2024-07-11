@@ -1,41 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Option } from "@/types/user";
+import { Dispatch, SetStateAction } from "react";
+import CreatableSelect from "react-select/creatable";
 import { ActionMeta } from "react-select";
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import Select, { components } from "react-select";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { useEffect, useRef } from "react";
+import { components } from "react-select";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 import SpinnerIcon from "../icons/spinner";
-
-interface Props {
-  options: Option[];
-  selected?: Option[] | null;
-  setSelected?: Dispatch<SetStateAction<any>>;
-  placeholder: string;
-  hide?: boolean;
-  form?: any;
-  formName?: string;
-  label?: string;
-  isOptionsLoading?: boolean;
-  selectType: "single" | "multi";
-  className?: string;
-  direction?: "row" | "column";
-  disabled?: boolean;
-  rightActionElement?: any;
-
-  // menuPlacement?: "top";
-}
-
-export type Option = {
-  value: number | string;
-  label: string;
-};
 
 const reactSelectCustomStyles = {
   control: (_provided: any, state: any) => ({
@@ -67,7 +38,26 @@ const reactSelectCustomStyles = {
   }),
 };
 
-function AppFormReactSelect(props: Props) {
+interface Props {
+  options: Option[];
+  selected?: Option[] | null;
+  setSelected?: Dispatch<SetStateAction<any>>;
+  placeholder: string;
+  hide?: boolean;
+  form?: any;
+  formName?: string;
+  label?: string;
+  isOptionsLoading?: boolean;
+  selectType: "single" | "multi";
+  className?: string;
+  direction?: "row" | "column";
+  disabled?: boolean;
+  rightActionElement?: any;
+
+  // menuPlacement?: "top";
+}
+
+const AppCreateableReactSelect = (props: Props) => {
   // For component "memory"
 
   const valueRef = useRef(props.selected || []);
@@ -187,112 +177,43 @@ function AppFormReactSelect(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const ReactSelect = ({ field }: any) => {
-    return (
-      <Select
-        isOptionSelected={isOptionSelected}
-        className={cn(
-          "w-full rounded-md border border-input text-sm shadow-sm transition-colors placeholder:text-muted-foreground",
-          props.className
-        )}
-        styles={reactSelectCustomStyles}
-        closeMenuOnSelect={false}
-        defaultValue={
-          props.form
-            ? props.selectType === "single"
-              ? field.value
-              : getOptions()
-            : getOptions()
-        }
-        menuPlacement="auto"
-        value={
-          props.form
-            ? props.selectType === "single"
-              ? field.value
-              : getValue()
-            : getValue()
-        }
-        isMulti={props.selectType === "multi"}
-        isSearchable
-        components={{
-          Option:
-            props.selectType === "multi" ? CheckboxOption : SingleSelectOption,
-          MultiValue: MultiValue,
-          LoadingIndicator: () => (
-            <SpinnerIcon
-              className="mx-auto h-6 w-6 animate-spin text-[#ccc]"
-              aria-hidden="true"
-            />
-          ),
-        }}
-        placeholder={props.placeholder}
-        isDisabled={props.disabled}
-        options={getOptions()}
-        onChange={
-          props.selectType === "single" && props.form
-            ? field.onChange
-            : handleSelect
-        }
-        hideSelectedOptions={props.hide ?? false}
-        instanceId={props.placeholder}
-        id={props.placeholder}
-        isLoading={props.isOptionsLoading}
-        loadingMessage={() => null}
-      />
-    );
-  };
-
-  if (props.form && props.formName) {
-    return (
-      <FormField
-        control={props.form?.control || null}
-        name={props?.formName}
-        render={({ field }) => (
-          <FormItem
-            className={cn("block ", {
-              "flex items-center": props.direction === "row",
-            })}
-          >
-            <div className="flex justify-between items-center p-0 m-0">
-              <FormLabel
-                className={cn("w-full", {
-                  "w-[40%]": props.direction === "row",
-                })}
-              >
-                {props.label}
-              </FormLabel>
-              {props.rightActionElement ? (
-                props.rightActionElement
-              ) : (
-                <div> &#8203;</div>
-              )}
-            </div>
-            <div className="w-full">
-              <FormControl>
-                <ReactSelect field={field} />
-              </FormControl>
-              <FormMessage />
-            </div>
-          </FormItem>
-        )}
-      />
-    );
-  }
-
   return (
-    <div
+    <CreatableSelect
+      isClearable
+      isOptionSelected={isOptionSelected}
       className={cn(
-        "block ",
-        {
-          "flex items-center gap-x-2": props.direction === "row",
-        },
+        "w-full rounded-md border border-input text-sm shadow-sm transition-colors placeholder:text-muted-foreground",
         props.className
       )}
-    >
-      <Label className="text-sm block mb-2">{props.label}</Label>
-      <ReactSelect />
-    </div>
+      styles={reactSelectCustomStyles}
+      closeMenuOnSelect={false}
+      defaultValue={getOptions()}
+      menuPlacement="auto"
+      value={getValue()}
+      isMulti={props.selectType === "multi"}
+      isSearchable
+      components={{
+        Option:
+          props.selectType === "multi" ? CheckboxOption : SingleSelectOption,
+        MultiValue: MultiValue,
+        LoadingIndicator: () => (
+          <SpinnerIcon
+            className="mx-auto h-6 w-6 animate-spin text-[#ccc]"
+            aria-hidden="true"
+          />
+        ),
+      }}
+      placeholder={props.placeholder}
+      isDisabled={props.disabled}
+      options={getOptions()}
+      onChange={handleSelect}
+      hideSelectedOptions={props.hide ?? false}
+      instanceId={props.placeholder}
+      id={props.placeholder}
+      isLoading={props.isOptionsLoading}
+      loadingMessage={() => null}
+    />
   );
-}
+};
 
-export default AppFormReactSelect;
+export default AppCreateableReactSelect;

@@ -10,16 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -30,8 +20,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import AppFormReactSelect from "@/components/common/app-form-react-select";
+// import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { Option } from "@/types/user";
+import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
+import AppFormReactSelect from "@/components/common/app-form-react-select";
 
 type Response = {
   [key: number]: string | number | Option[] | Response[];
@@ -67,7 +59,7 @@ const DynamicQuestionnaire = () => {
         return (
           <Input
             id={question.id.toString()}
-            value={(responsesData[question.id] as string) || ""}
+            value={typeof responsesData[question.id] === 'object' || !responsesData[question.id] ? "" : (responsesData[question.id] as string)}
             onChange={(event) =>
               handleInputChange(
                 question.id,
@@ -79,32 +71,30 @@ const DynamicQuestionnaire = () => {
         );
       case "single-select":
         return (
-          <Select
-            onValueChange={(value) =>
-              handleInputChange(question.id, value, setResponseData)
+          <AppFormReactSelect
+            options={
+              question.options?.map((item) => ({ label: item, value: item })) ||
+              []
             }
-            defaultValue={responsesData[question?.id]?.toString() || ""}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={question.question} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>{question.id}</SelectLabel>
-                {question?.options?.map((item) => {
-                  return (
-                    <SelectItem value={item} key={item}>
-                      {item}
-                    </SelectItem>
-                  );
-                })}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            label=""
+            isOptionsLoading={false}
+            placeholder={question.question}
+            selectType="single"
+            direction="column"
+            className="col-span-2 -mt-1"
+            selected={
+              responsesData[question.id]
+                ? (responsesData[question.id] as Option[])
+                : null
+            }
+            setSelected={(value) => {
+              handleInputChange(question.id, value, setResponseData);
+            }}
+          />
         );
       case "multi-select":
         return (
-          <AppFormReactSelect
+          <AppCreateableReactSelect
             options={
               question.options?.map((item) => ({ label: item, value: item })) ||
               []
@@ -157,7 +147,7 @@ const DynamicQuestionnaire = () => {
 
     // If we have some conditions then based on that navigate to either next question or else question
     if (question.conditions) {
-      if (question.conditions.showIf === responses[question.id]) {
+      if (question.conditions.showIf === (responses[question.id] as Option[])?.[0].value) {
         const next = household_eng_dynamic.find(
           (item) => item.id === question?.conditions?.nextQuestionId
         );
@@ -184,7 +174,11 @@ const DynamicQuestionnaire = () => {
   };
 
   const handlePrevQuestion = (question: QuestionTypeDynamic) => {
-    setResponses((prevData) => ({ ...prevData, [question.id]: "", [question.prevQuestionId!]:"" }));
+    setResponses((prevData) => ({
+      ...prevData,
+      [question.id]: "",
+      // [question.prevQuestionId!]: "",
+    }));
     if (!question?.prevQuestionId) {
       return;
     }
@@ -230,10 +224,13 @@ const DynamicQuestionnaire = () => {
           setResponses((prevData) => {
             return {
               ...prevData,
-              [currentQuestion.id]: [...repeatQuestionResponseArray, repeatQuestionsResponse],
+              [currentQuestion.id]: [
+                ...repeatQuestionResponseArray,
+                repeatQuestionsResponse,
+              ],
             };
           });
-          setRepeatQuestionResponseArray([])
+          setRepeatQuestionResponseArray([]);
         }
       }
     }
@@ -270,12 +267,14 @@ const DynamicQuestionnaire = () => {
           <Button
             type="button"
             onClick={() => handlePrevQuestion(currentQuestion)}
+            disabled={!currentQuestion.prevQuestionId}
           >
             Prev
           </Button>
           <Button
             type="button"
             onClick={() => handleNextQuestion(currentQuestion)}
+            disabled={!responses[currentQuestion.id]}
           >
             Next
           </Button>
@@ -283,9 +282,12 @@ const DynamicQuestionnaire = () => {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent
+          className="sm:max-w-[425px] top-[20%]"
+          onInteractOutside={(event) => event.preventDefault()}
+        >
           <DialogHeader>
-            <DialogTitle>{currentRepeatQuestion?.question}</DialogTitle>
+            <DialogTitle>{currentRepeatQuestion?.question}-{repeatQuestionResponseArray.length + 1}</DialogTitle>
             <DialogDescription>
               {currentRepeatQuestion?.instructions}
             </DialogDescription>
@@ -302,12 +304,14 @@ const DynamicQuestionnaire = () => {
             <Button
               type="button"
               onClick={() => handlePrevRepeatQuestion(currentRepeatQuestion)}
+              disabled={!currentRepeatQuestion?.prevQuestionId}
             >
               Prev
             </Button>
             <Button
               type="button"
               onClick={() => handleNextRepeatQuestion(currentRepeatQuestion)}
+              disabled={currentRepeatQuestion?.id ? !repeatQuestionsResponse[currentRepeatQuestion?.id] : false}
             >
               Next
             </Button>
