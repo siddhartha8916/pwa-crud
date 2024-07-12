@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import {
   household_eng_dynamic,
+  QuestionToRepeat,
   QuestionTypeDynamic,
 } from "@/data/household_module/household_eng";
 import {
@@ -10,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+// import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -24,6 +25,7 @@ import {
 import { Option } from "@/types/user";
 import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 import AppFormReactSelect from "@/components/common/app-form-react-select";
+import { useState } from "react";
 
 type Response = {
   [key: number]: string | number | Option[] | Response[];
@@ -33,17 +35,46 @@ const DynamicQuestionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
     household_eng_dynamic[0]
   );
-  const [repeatQuestions, setRepeatQuestions] =
-    useState<QuestionTypeDynamic[]>();
+  const [repeatQuestions, setRepeatQuestions] = useState<QuestionToRepeat[]>();
   const [repeatQuestionsResponse, setRepeatQuestionsResponse] =
     useState<Response>({});
   const [currentRepeatQuestion, setCurrentRepeatQuestion] =
-    useState<QuestionTypeDynamic>();
+    useState<QuestionToRepeat>();
   const [repeatCount, setRepeatCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [repeatQuestionResponseArray, setRepeatQuestionResponseArray] =
     useState<Response[]>([]);
+  const [questionOptions, setQuestionOptions] = useState<Option[]>();
   // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
+
+  // console.log("questionOptions", questionOptions);
+
+  const getOptions = async (
+    question: QuestionTypeDynamic | QuestionToRepeat
+  ) => {
+    if (question.options && question.options.length > 0) {
+      setQuestionOptions(
+        question.options?.map((item) => ({ label: item, value: item }))
+      );
+      return;
+    } else {
+      if (question.optionsResult && !question.dependentOnQuestionId) {
+        const response = await fetch(question?.optionsResult);
+        const data = await response.json();
+        setQuestionOptions(
+          data.map((item: string) => ({ label: item, value: item }))
+        );
+      }
+      if (question.optionsResult && question.dependentOnQuestionId) {
+        const response = await fetch(question?.optionsResult);
+        const data = await response.json();
+        const selectedPrevRespose = (responses[question.prevQuestionId!] as Option[])?.[0].value
+        setQuestionOptions(
+          data[selectedPrevRespose].map((item: string) => ({ label: item, value: item }))
+        );
+      }
+    }
+  };
 
   const [responses, setResponses] = useState<Response>({});
   // console.log("repeatQuestionsResponse", repeatQuestionsResponse);
@@ -59,7 +90,12 @@ const DynamicQuestionnaire = () => {
         return (
           <Input
             id={question.id.toString()}
-            value={typeof responsesData[question.id] === 'object' || !responsesData[question.id] ? "" : (responsesData[question.id] as string)}
+            value={
+              typeof responsesData[question.id] === "object" ||
+              !responsesData[question.id]
+                ? ""
+                : (responsesData[question.id] as string)
+            }
             onChange={(event) =>
               handleInputChange(
                 question.id,
@@ -70,12 +106,12 @@ const DynamicQuestionnaire = () => {
           />
         );
       case "single-select":
+        if (!questionOptions) {
+          getOptions(question)
+        }
         return (
           <AppFormReactSelect
-            options={
-              question.options?.map((item) => ({ label: item, value: item })) ||
-              []
-            }
+            options={questionOptions || []}
             label=""
             isOptionsLoading={false}
             placeholder={question.question}
@@ -93,12 +129,12 @@ const DynamicQuestionnaire = () => {
           />
         );
       case "single-select-others":
+        if (!questionOptions) {
+          getOptions(question)
+        }
         return (
           <AppCreateableReactSelect
-            options={
-              question.options?.map((item) => ({ label: item, value: item })) ||
-              []
-            }
+            options={questionOptions || []}
             label=""
             isOptionsLoading={false}
             placeholder={question.question}
@@ -116,12 +152,13 @@ const DynamicQuestionnaire = () => {
           />
         );
       case "multi-select":
+        if (!questionOptions) {
+          getOptions(question)
+        }
+
         return (
           <AppFormReactSelect
-            options={
-              question.options?.map((item) => ({ label: item, value: item })) ||
-              []
-            }
+            options={questionOptions || []}
             label=""
             isOptionsLoading={false}
             placeholder={question.question}
@@ -139,12 +176,13 @@ const DynamicQuestionnaire = () => {
           />
         );
       case "multi-select-others":
+        if (!questionOptions) {
+          getOptions(question)
+        }
+
         return (
           <AppCreateableReactSelect
-            options={
-              question.options?.map((item) => ({ label: item, value: item })) ||
-              []
-            }
+            options={questionOptions || []}
             label=""
             isOptionsLoading={false}
             placeholder={question.question}
@@ -175,6 +213,8 @@ const DynamicQuestionnaire = () => {
   };
 
   const handleNextQuestion = (question: QuestionTypeDynamic) => {
+
+    setQuestionOptions(undefined)
     // Dont do anything if next question id is null
     if (!question?.nextQuestionId && !question?.conditions?.nextQuestionId) {
       return;
@@ -193,7 +233,10 @@ const DynamicQuestionnaire = () => {
 
     // If we have some conditions then based on that navigate to either next question or else question
     if (question.conditions) {
-      if (question.conditions.showIf === (responses[question.id] as Option[])?.[0].value) {
+      if (
+        question.conditions.showIf ===
+        (responses[question.id] as Option[])?.[0].value
+      ) {
         const next = household_eng_dynamic.find(
           (item) => item.id === question?.conditions?.nextQuestionId
         );
@@ -220,6 +263,7 @@ const DynamicQuestionnaire = () => {
   };
 
   const handlePrevQuestion = (question: QuestionTypeDynamic) => {
+    setQuestionOptions(undefined)
     setResponses((prevData) => ({
       ...prevData,
       [question.id]: "",
@@ -236,7 +280,8 @@ const DynamicQuestionnaire = () => {
     }
   };
 
-  const handleNextRepeatQuestion = (question?: QuestionTypeDynamic) => {
+  const handleNextRepeatQuestion = (question?: QuestionToRepeat) => {
+    setQuestionOptions(undefined)
     if (question) {
       const next = repeatQuestions?.find(
         (item) => item.id === question?.nextQuestionId
@@ -282,7 +327,8 @@ const DynamicQuestionnaire = () => {
     }
   };
 
-  const handlePrevRepeatQuestion = (question?: QuestionTypeDynamic) => {
+  const handlePrevRepeatQuestion = (question?: QuestionToRepeat) => {
+    setQuestionOptions(undefined)
     if (question) {
       //
       const prev = repeatQuestions?.find(
@@ -333,9 +379,21 @@ const DynamicQuestionnaire = () => {
           onInteractOutside={(event) => event.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle>{currentRepeatQuestion?.question}-{repeatQuestionResponseArray.length + 1}</DialogTitle>
+            <DialogTitle>
+              {currentRepeatQuestion?.question} -{" "}
+              {
+                repeatQuestionsResponse[
+                  currentRepeatQuestion?.loopHeadingQuestionId as number
+                ] as string
+              }
+            </DialogTitle>
             <DialogDescription>
-              {currentRepeatQuestion?.instructions}
+              {currentRepeatQuestion?.instructions} for{" "}
+              {
+                repeatQuestionsResponse[
+                  currentRepeatQuestion?.loopHeadingQuestionId as number
+                ] as string
+              }
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -357,7 +415,11 @@ const DynamicQuestionnaire = () => {
             <Button
               type="button"
               onClick={() => handleNextRepeatQuestion(currentRepeatQuestion)}
-              disabled={currentRepeatQuestion?.id ? !repeatQuestionsResponse[currentRepeatQuestion?.id] : false}
+              disabled={
+                currentRepeatQuestion?.id
+                  ? !repeatQuestionsResponse[currentRepeatQuestion?.id]
+                  : false
+              }
             >
               Next
             </Button>

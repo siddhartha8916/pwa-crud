@@ -8,9 +8,9 @@ import {
 } from "workbox-precaching";
 import { clientsClaim } from "workbox-core";
 import { NavigationRoute, registerRoute } from "workbox-routing";
-import { NetworkFirst } from "workbox-strategies";
+import { CacheOnly, NetworkFirst } from "workbox-strategies";
 import { Queue } from "workbox-background-sync";
-import { USERS_CACHE } from "./config/constants";
+import { APPLICATION_CACHE, USERS_CACHE } from "./config/constants";
 import { I_AddUser_Body } from "./types/user";
 import { getApplicationSecret } from "./lib/utils";
 
@@ -75,6 +75,15 @@ registerRoute(
   },
   new NetworkFirst({
     cacheName: USERS_CACHE,
+  })
+);
+
+registerRoute(
+  ({ url, request }) => {
+    return url.pathname.startsWith("/api/v1") && request.method === "GET";
+  },
+  new CacheOnly({
+    cacheName: APPLICATION_CACHE,
   })
 );
 

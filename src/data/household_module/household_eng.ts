@@ -148,6 +148,8 @@ export type QuestionTypeDynamic = {
   question: string;
   type: string;
   options?: string[];
+  optionsResult?: string;
+  dependentOnQuestionId?: number;
   validationRule: number;
   instructions: string;
   nextQuestionId?: number | null;
@@ -158,7 +160,21 @@ export type QuestionTypeDynamic = {
     elseQuestionId: number;
   };
   repeatFlag?: boolean;
-  questionsToRepeat?: QuestionTypeDynamic[];
+  questionsToRepeat?: QuestionToRepeat[];
+};
+
+export type QuestionToRepeat = {
+  id: number;
+  question: string;
+  type: string;
+  options?: string[];
+  optionsResult?: string;
+  dependentOnQuestionId?:number
+  validationRule: number;
+  instructions: string;
+  nextQuestionId?: number | null;
+  prevQuestionId: number | null;
+  loopHeadingQuestionId: number;
 };
 
 export const validationRule = {
@@ -184,6 +200,56 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 2,
+    question: "Please select province",
+    instructions: "Please select the province that apply...",
+    type: "single-select",
+    options: [],
+    optionsResult: "https://pwa-api.brainstacktechnologies.com/api/v1/province",
+    validationRule: 7,
+    prevQuestionId: 1,
+    nextQuestionId: 3,
+  },
+  {
+    id: 3,
+    question: "Please select commune",
+    instructions: "Select the commune within the chosen province.",
+    type: "single-select",
+    options: [],
+    optionsResult:
+      "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",
+    validationRule: 7,
+    dependentOnQuestionId: 2,
+    prevQuestionId: 2,
+    nextQuestionId: 4,
+  },
+  {
+    id: 4,
+    question: "Please select Hill - Coline",
+    instructions: "Select the hill_coline within the chosen commune.",
+    type: "single-select-others",
+    options: [],
+    optionsResult:
+      "https://pwa-api.brainstacktechnologies.com/api/v1/commune-hill",
+    dependentOnQuestionId: 3,
+    validationRule: 7,
+    prevQuestionId: 3,
+    nextQuestionId: 5,
+  },
+  {
+    id: 5,
+    question: "Please select Subhill",
+    instructions: "Select the subhill within the chosen hill_coline.",
+    type: "single-select-others",
+    options: [],
+    optionsResult:
+      "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
+    dependentOnQuestionId: 4,
+    validationRule: 7,
+    prevQuestionId: 4,
+    nextQuestionId: 6,
+  },
+  {
+    id: 6,
     question: "Do you have children?",
     instructions: "Please enter Do you have children...",
     type: "single-select",
@@ -192,30 +258,31 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     prevQuestionId: 1,
     conditions: {
       showIf: "Yes",
-      nextQuestionId: 3,
-      elseQuestionId: 5,
+      nextQuestionId: 7,
+      elseQuestionId: 9,
     },
   },
   {
-    id: 3,
-    question: "How many children do you have?",
-    instructions: "Please enter How many children do you have...",
+    id: 7,
+    question: "What are the sum of their ages?",
+    instructions: "Please enter sum of their ages...",
     type: "number",
     validationRule: 1,
-    nextQuestionId: 4,
-    prevQuestionId: 2,
+    prevQuestionId: 6,
+    nextQuestionId: 8,
   },
   {
-    id: 4,
-    question: "What are their ages?",
-    instructions: "Please enter children's ages?...",
-    type: "text",
-    validationRule: 1,
-    nextQuestionId: 5,
-    prevQuestionId: 2,
+    id: 8,
+    question: "Do they like mangoes?",
+    instructions: "Please select...",
+    type: "single-select",
+    validationRule: 7,
+    options: ["Yes", "No"],
+    prevQuestionId: 7,
+    nextQuestionId: 9,
   },
   {
-    id: 5,
+    id: 9,
     question: "Do you own a pet?",
     instructions: "Please enter Do you own a pet...",
     type: "single-select",
@@ -224,66 +291,67 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     prevQuestionId: 2,
     conditions: {
       showIf: "Yes",
-      nextQuestionId: 6,
-      elseQuestionId: 8,
+      nextQuestionId: 10,
+      elseQuestionId: 12,
     },
   },
   {
-    id: 6,
+    id: 10,
     question: "What kind of pet(s) do you have?",
     instructions: "Please enter What kind of pet(s) do you have...",
     type: "multi-select-others",
     options: ["Dog", "Cat", "Bird"],
     validationRule: 4,
-    prevQuestionId: 5,
-    nextQuestionId: 7,
-  },
-  {
-    id: 7,
-    question: "How old is your pet?",
-    instructions: "Please enter How old is your pet...",
-    type: "number",
-    validationRule: 1,
-    prevQuestionId: 6,
-    nextQuestionId: 8,
-  },
-  {
-    id: 8,
-    question: "Enter your email address:",
-    instructions: "Please enter your email address...",
-    type: "text",
-    prevQuestionId: 5,
-    validationRule: 8,
-    nextQuestionId: 9,
-  },
-  {
-    id: 9,
-    question: "Which language do you speak?",
-    instructions: "Please select all that apply...",
-    type: "single-select-others",
-    options: ["English", "Spanish", "French", "German"],
-    validationRule: 7,
-    prevQuestionId: 8,
-    nextQuestionId: 10,
-  },
-  {
-    id: 10,
-    question: "Which hobbies do you enjoy?",
-    instructions: "Please select all that apply...",
-    type: "multi-select",
-    options: ["Reading", "Sports", "Cooking", "Gardening", "Traveling"],
-    validationRule: 7,
     prevQuestionId: 9,
     nextQuestionId: 11,
   },
   {
     id: 11,
-    question: "How many household members are there?",
-    instructions: "Please enter household members number...",
+    question: "How old is your pet?",
+    instructions: "Please enter How old is your pet...",
     type: "number",
     validationRule: 1,
     prevQuestionId: 10,
     nextQuestionId: 12,
+  },
+  {
+    id: 12,
+    question: "Enter your email address:",
+    instructions: "Please enter your email address...",
+    type: "text",
+    validationRule: 8,
+    prevQuestionId: 11,
+    nextQuestionId: 13,
+  },
+  {
+    id: 13,
+    question: "Which language do you speak?",
+    instructions:
+      "Please select all that apply... Please enter if no values found",
+    type: "single-select-others",
+    options: ["English", "Spanish", "French", "German"],
+    validationRule: 7,
+    prevQuestionId: 12,
+    nextQuestionId: 14,
+  },
+  {
+    id: 14,
+    question: "Which hobbies do you enjoy?",
+    instructions: "Please select all that apply...",
+    type: "multi-select",
+    options: ["Reading", "Sports", "Cooking", "Gardening", "Traveling"],
+    validationRule: 7,
+    prevQuestionId: 13,
+    nextQuestionId: 15,
+  },
+  {
+    id: 15,
+    question: "How many household members are there?",
+    instructions: "Please enter household members number...",
+    type: "number",
+    validationRule: 1,
+    prevQuestionId: 14,
+    nextQuestionId: 16,
     questionsToRepeat: [
       {
         id: 111,
@@ -291,6 +359,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
         type: "text",
         validationRule: 1,
         instructions: "Please enter the member name...",
+        loopHeadingQuestionId: 111,
         prevQuestionId: null,
         nextQuestionId: 222,
       },
@@ -300,19 +369,20 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
         type: "number",
         validationRule: 1,
         instructions: "Please enter the member age...",
+        loopHeadingQuestionId: 111,
         prevQuestionId: 111,
         nextQuestionId: null,
       },
     ],
   },
   {
-    id: 12,
+    id: 16,
     question: "Which books do you read?",
     instructions: "Please select all that apply...",
     type: "multi-select",
     options: ["Comic", "Horror", "Thriller", "Sci-Fi", "Others"],
     validationRule: 7,
-    prevQuestionId: 11,
+    prevQuestionId: 15,
     nextQuestionId: null,
   },
 ];

@@ -1,6 +1,10 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { APPLICATION_CACHE, PUBLIC_KEY } from "@/config/constants";
+import { all_province } from "@/data/household_module/all-province";
+import { province_commune_mapping } from "@/data/household_module/province-commune-mapping";
+import { commune_hill_mapping } from "@/data/household_module/commune-hill-mapping";
+import { hill_subhill_mapping } from "@/data/household_module/hill-subhill-mapping";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -124,25 +128,23 @@ async function encryptDataWithRSA(data: string): Promise<string> {
   }
 }
 
-async function getApplicationRandomUUID() {
-  // Update the cache with the new user data
-  const cache = await caches.open(APPLICATION_CACHE);
-  const cachedResponse = await cache.match("/uuid");
-  if (cachedResponse) {
-    const uuid = await cachedResponse.text();
-    return uuid;
-  } else {
-    const uuid = self.crypto.randomUUID();
-    cache.put("/uuid", new Response(uuid));
-    return uuid;
-  }
-}
+// async function getApplicationRandomUUID() {
+//   // Update the cache with the new user data
+//   const cache = await caches.open(APPLICATION_CACHE);
+//   const cachedResponse = await cache.match("/uuid");
+//   if (cachedResponse) {
+//     const uuid = await cachedResponse.text();
+//     return uuid;
+//   } else {
+//     const uuid = self.crypto.randomUUID();
+//     cache.put("/uuid", new Response(uuid));
+//     return uuid;
+//   }
+// }
 
 export const getApplicationSecret = async () => {
-  const uuid = await getApplicationRandomUUID();
-  const encryptedData = await encryptDataWithRSA(
-    `${uuid}_${Date.now().toString()}`
-  );
+  // const uuid = await getApplicationRandomUUID();
+  const encryptedData = await encryptDataWithRSA(`${Date.now().toString()}`);
   return encryptedData;
 };
 
@@ -153,4 +155,53 @@ export const getCurrentPosition = (): Promise<GeolocationPosition> => {
       maximumAge: 0,
     });
   });
+};
+
+export const populateDataToCache = async () => {
+  const cache = await caches.open(APPLICATION_CACHE);
+  const province = all_province;
+  cache.put(
+    "https://pwa-api.brainstacktechnologies.com/api/v1/province",
+    new Response(JSON.stringify(province), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+  );
+
+  const province_commune = province_commune_mapping;
+  cache.put(
+    "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",
+    new Response(JSON.stringify(province_commune), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+  );
+
+  const commune_hill = commune_hill_mapping;
+  cache.put(
+    "https://pwa-api.brainstacktechnologies.com/api/v1/commune-hill",
+    new Response(JSON.stringify(commune_hill), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+  );
+
+  const hill_subhill = hill_subhill_mapping;
+  cache.put(
+    "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
+    new Response(JSON.stringify(hill_subhill), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+  );
+
+
 };
