@@ -5,6 +5,7 @@ import Router from "./routes/router.tsx";
 import { LanguageProvider } from "./context/language-context.tsx";
 import { useEffect } from "react";
 import { populateDataToCache } from "./lib/utils.ts";
+import { validateJSONSchema } from "./lib/validate-response.ts";
 
 function App() {
   useEffect(() => {
@@ -12,6 +13,7 @@ function App() {
       await populateDataToCache();
     };
     populateCache();
+    validateJSONSchema()
   }, []);
 
   return (
