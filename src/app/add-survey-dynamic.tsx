@@ -205,6 +205,7 @@ const DynamicQuestionnaire = () => {
     });
     console.log("responses", responses);
     console.log("updatedData", updatedData);
+    console.log("modifiedResponseData", modifiedResponseData());
   };
 
   const [responses, setResponses] = useState<Response>({});
@@ -478,7 +479,7 @@ const DynamicQuestionnaire = () => {
       <h2 className="text-lg font-medium">Dynamic Questionnaire</h2>
       {household_eng_dynamic.findIndex(quest => quest.id === currentQuestion.id) + 1} / {household_eng_dynamic.length}
       <Button variant={'outline'} className="p-0 w-9" onClick={() => {
-        setResponses(modifiedResponseData)
+        setResponses(modifiedResponseData())
       }}>
         <Pencil1Icon className="p-0"/>
       </Button>

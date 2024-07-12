@@ -290,7 +290,7 @@ export const modifiedResponseData = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const modifiedData: Record<string, any> = {};
 
-  Object.entries(apiResponseData).forEach(([key]) => {
+  Object.entries(apiResponseData).forEach(([key, value]) => {
     const currentQuestionResponse = apiJSONResponse.find(
       (item) => item.id === Number(key)
     );
@@ -301,7 +301,8 @@ export const modifiedResponseData = () => {
           "single-select-others",
           "multi-select",
           "multi-select-others",
-        ].includes(currentQuestionResponse?.type)
+        ].includes(currentQuestionResponse?.type) &&
+        typeof value === "string"
       ) {
         // console.log('apiResponseData[key]', apiResponseData[key])
         modifiedData[key] = [
@@ -310,6 +311,17 @@ export const modifiedResponseData = () => {
             value: apiResponseData[key],
           },
         ];
+      } else if (
+        [
+          "single-select",
+          "single-select-others",
+          "multi-select",
+          "multi-select-others",
+        ].includes(currentQuestionResponse?.type) &&
+        Array.isArray(value) &&
+        value.length > 1
+      ) {
+        modifiedData[key] = value.map((item) => ({ label: item, value: item }));
       } else {
         modifiedData[key] = apiResponseData[key];
       }
