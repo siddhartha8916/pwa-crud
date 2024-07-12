@@ -28,7 +28,7 @@ import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { useState } from "react";
 
 type Response = {
-  [key: number]: string | number | Option[] | Response[];
+  [key: number | string]: string | number | Option[] | Response[];
 };
 
 const DynamicQuestionnaire = () => {
@@ -68,12 +68,129 @@ const DynamicQuestionnaire = () => {
       if (question.optionsResult && question.dependentOnQuestionId) {
         const response = await fetch(question?.optionsResult);
         const data = await response.json();
-        const selectedPrevRespose = (responses[question.prevQuestionId!] as Option[])?.[0].value
+        const selectedPrevRespose = (
+          responses[question.prevQuestionId!] as Option[]
+        )?.[0].value;
         setQuestionOptions(
-          data[selectedPrevRespose]?.map((item: string) => ({ label: item, value: item })) || []
+          data[selectedPrevRespose]?.map((item: string) => ({
+            label: item,
+            value: item,
+          })) || []
         );
       }
     }
+  };
+
+  const printResponse = () => {
+    // const data: Response = {
+    //   "1": "67",
+    //   "2": [
+    //     {
+    //       label: "Bubanza",
+    //       value: "Bubanza",
+    //     },
+    //   ],
+    //   "3": [
+    //     {
+    //       label: "Gihanga",
+    //       value: "Gihanga",
+    //     },
+    //   ],
+    //   "4": [
+    //     {
+    //       label: "Domaine Militaire",
+    //       value: "Domaine Militaire",
+    //     },
+    //   ],
+    //   "5": [
+    //     {
+    //       label: "Domaine Militaire",
+    //       value: "Domaine Militaire",
+    //     },
+    //   ],
+    //   "6": [
+    //     {
+    //       label: "No",
+    //       value: "No",
+    //     },
+    //   ],
+    //   "9": [
+    //     {
+    //       label: "Yes",
+    //       value: "Yes",
+    //     },
+    //   ],
+    //   "10": [
+    //     {
+    //       label: "Dog",
+    //       value: "Dog",
+    //     },
+    //     {
+    //       label: "Cat",
+    //       value: "Cat",
+    //     },
+    //     {
+    //       label: "Bird",
+    //       value: "Bird",
+    //     },
+    //   ],
+    //   "11": "6",
+    //   "12": "siddhartha@gmail.com",
+    //   "13": [
+    //     {
+    //       label: "English",
+    //       value: "English",
+    //     },
+    //   ],
+    //   "14": [
+    //     {
+    //       label: "Reading",
+    //       value: "Reading",
+    //     },
+    //     {
+    //       label: "Sports",
+    //       value: "Sports",
+    //     },
+    //   ],
+    //   "15": [
+    //     {
+    //       "111": "Archana Kumari",
+    //       "222": "43",
+    //     },
+    //     {
+    //       "111": "Ratna Priya",
+    //       "222": "26",
+    //     },
+    //     {
+    //       "111": "Manoj Singh",
+    //       "222": "55",
+    //     },
+    //   ],
+    //   "16": [
+    //     {
+    //       label: "Comic",
+    //       value: "Comic",
+    //     },
+    //     {
+    //       label: "Horror",
+    //       value: "Horror",
+    //     },
+    //   ],
+    // };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatedData: any = {}
+
+    Object.entries(responses).forEach(([key, value]) => {
+
+      if (Array.isArray(value) && value.length === 1 && typeof value[0] === 'object' && 'value' in value[0]) {
+        updatedData[key] = value[0].value; // If length is 1, add as string
+      } else if (Array.isArray(value) && value.every(item => typeof item === 'object' && 'label' in item && 'value' in item)) {
+        updatedData[key] = value.map(item => item.value); // If length > 1 and all items have label and value, add as string[]
+      } else {
+        updatedData[key] = value; // For other types of values, just copy as-is
+      }
+    });
+    console.log('updatedData', updatedData)
   };
 
   const [responses, setResponses] = useState<Response>({});
@@ -107,7 +224,7 @@ const DynamicQuestionnaire = () => {
         );
       case "single-select":
         if (!questionOptions) {
-          getOptions(question)
+          getOptions(question);
         }
         return (
           <AppFormReactSelect
@@ -130,7 +247,7 @@ const DynamicQuestionnaire = () => {
         );
       case "single-select-others":
         if (!questionOptions) {
-          getOptions(question)
+          getOptions(question);
         }
         return (
           <AppCreateableReactSelect
@@ -153,7 +270,7 @@ const DynamicQuestionnaire = () => {
         );
       case "multi-select":
         if (!questionOptions) {
-          getOptions(question)
+          getOptions(question);
         }
 
         return (
@@ -177,7 +294,7 @@ const DynamicQuestionnaire = () => {
         );
       case "multi-select-others":
         if (!questionOptions) {
-          getOptions(question)
+          getOptions(question);
         }
 
         return (
@@ -213,8 +330,7 @@ const DynamicQuestionnaire = () => {
   };
 
   const handleNextQuestion = (question: QuestionTypeDynamic) => {
-
-    setQuestionOptions(undefined)
+    setQuestionOptions(undefined);
     // Dont do anything if next question id is null
     if (!question?.nextQuestionId && !question?.conditions?.nextQuestionId) {
       return;
@@ -263,7 +379,7 @@ const DynamicQuestionnaire = () => {
   };
 
   const handlePrevQuestion = (question: QuestionTypeDynamic) => {
-    setQuestionOptions(undefined)
+    setQuestionOptions(undefined);
     setResponses((prevData) => ({
       ...prevData,
       [question.id]: "",
@@ -281,7 +397,7 @@ const DynamicQuestionnaire = () => {
   };
 
   const handleNextRepeatQuestion = (question?: QuestionToRepeat) => {
-    setQuestionOptions(undefined)
+    setQuestionOptions(undefined);
     if (question) {
       const next = repeatQuestions?.find(
         (item) => item.id === question?.nextQuestionId
@@ -328,7 +444,7 @@ const DynamicQuestionnaire = () => {
   };
 
   const handlePrevRepeatQuestion = (question?: QuestionToRepeat) => {
-    setQuestionOptions(undefined)
+    setQuestionOptions(undefined);
     if (question) {
       //
       const prev = repeatQuestions?.find(
@@ -427,11 +543,7 @@ const DynamicQuestionnaire = () => {
         </DialogContent>
       </Dialog>
 
-      <Button
-        type="submit"
-        className="mt-5"
-        onClick={() => console.log(responses)}
-      >
+      <Button type="submit" className="mt-5" onClick={printResponse}>
         Submit
       </Button>
     </div>
