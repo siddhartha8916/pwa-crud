@@ -62,7 +62,7 @@ const DynamicQuestionnaire = () => {
         const response = await fetch(question?.optionsResult);
         const data = await response.json();
         setQuestionOptions(
-          data.map((item: string) => ({ label: item, value: item }))
+          data?.map((item: string) => ({ label: item, value: item })) || []
         );
       }
       if (question.optionsResult && question.dependentOnQuestionId) {
@@ -70,7 +70,7 @@ const DynamicQuestionnaire = () => {
         const data = await response.json();
         const selectedPrevRespose = (responses[question.prevQuestionId!] as Option[])?.[0].value
         setQuestionOptions(
-          data[selectedPrevRespose].map((item: string) => ({ label: item, value: item }))
+          data[selectedPrevRespose]?.map((item: string) => ({ label: item, value: item })) || []
         );
       }
     }

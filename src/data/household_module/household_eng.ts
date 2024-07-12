@@ -255,7 +255,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     type: "single-select",
     validationRule: 7,
     options: ["Yes", "No"],
-    prevQuestionId: 1,
+    prevQuestionId: 5,
     conditions: {
       showIf: "Yes",
       nextQuestionId: 7,
