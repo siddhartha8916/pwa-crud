@@ -202,6 +202,48 @@ export const populateDataToCache = async () => {
       },
     })
   );
-
-
 };
+
+export async function getUserSubscriptionObject() {
+  try {
+    const serviceWorkerRegistration = await navigator.serviceWorker.ready;
+    const subscription = await serviceWorkerRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(
+        "BCrtLO_-1aOLACVK1Uz1KoPo4w6-ihPZZ39NNRXavx3ebFqMjgCpVy_onCZrYR4Ew30BZMMBGQm5qAoCmhLDVew"
+      ),
+    });
+
+    return subscription;
+  } catch (error) {
+    console.error("Error getting subscription object:", error);
+    return null;
+  }
+}
+
+export async function saveTokenToCache(token: string) {
+  try {
+    const cache = await caches.open(APPLICATION_CACHE);
+    cache.put(
+      "https://pwa-api.brainstacktechnologies.com/token",
+      new Response(token, {
+        status: 200,
+      })
+    );
+    return token;
+  } catch (error) {
+    console.log("error saving token to cache :>> ", error);
+    return false;
+  }
+}
+
+export async function getTokenFromCache() {
+  try {
+    const res = await fetch('https://pwa-api.brainstacktechnologies.com/token');
+    const token = await res.text()
+    return token;
+  } catch (error) {
+    console.log("error getting token from cache :>> ", error);
+    return null;
+  }
+}

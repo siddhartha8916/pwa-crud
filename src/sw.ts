@@ -87,6 +87,15 @@ registerRoute(
   })
 );
 
+registerRoute(
+  ({ url, request }) => {
+    return url.pathname.startsWith("/token") && request.method === "GET";
+  },
+  new CacheOnly({
+    cacheName: APPLICATION_CACHE,
+  })
+);
+
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 

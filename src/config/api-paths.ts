@@ -5,6 +5,9 @@ const apiPaths = {
   DELETE_USER: "/users/:userId",
   PUBLIC_KEY: "/public-key",
   ADD_SURVEY: "/add-survey",
+
+  REGISTER_USER: "/auth/signup",
+  LOGIN_USER: "/auth/login",
 };
 
 export default apiPaths;

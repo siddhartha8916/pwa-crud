@@ -6,6 +6,7 @@ import { LanguageProvider } from "./context/language-context.tsx";
 import { useEffect } from "react";
 import { populateDataToCache } from "./lib/utils.ts";
 import { validateJSONSchema } from "./lib/validate-response.ts";
+import { Toaster } from "./components/ui/toaster.tsx";
 
 function App() {
   useEffect(() => {
@@ -19,6 +20,7 @@ function App() {
   return (
     <ReactQueryProvider>
       <LanguageProvider>
+        <Toaster/>
         <Router />
       </LanguageProvider>
       <PWABadge />

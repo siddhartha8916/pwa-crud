@@ -1,4 +1,4 @@
-import { addHouseholdInfo, addUser, deleteUser, getAllUsers, getPublicKey } from "@/api/app-survey-api";
+import { addHouseholdInfo, addUser, deleteUser, getAllUsers, getPublicKey, loginUser, registerUser } from "@/api/app-survey-api";
 import queryClient from "@/lib/react-query-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -47,6 +47,22 @@ export const useAddHouseholdInfo = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["household-info"] });
     },
+    retry: false,
+  });
+};
+
+// -------------------------- Backend Integration ----------------------------
+
+export const useRegisterUser = () => {
+  return useMutation({
+    mutationFn: registerUser,
+    retry: false,
+  });
+};
+
+export const useLoginUser = () => {
+  return useMutation({
+    mutationFn: loginUser,
     retry: false,
   });
 };

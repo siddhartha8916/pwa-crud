@@ -1,6 +1,6 @@
 import apiPaths from "@/config/api-paths";
-import { applicationClient } from "@/lib/api-client";
-import { I_AddSurveyBody, I_AddSurveyResponse, I_AddUser_Body, I_User } from "@/types/user";
+import { applicationClient, surveyApplicationClient } from "@/lib/api-client";
+import { I_AddSurveyBody, I_AddSurveyResponse, I_AddUser_Body, I_LoginBody, I_LoginResponse, I_RegistrationBody, I_RegistrationResponse, I_User } from "@/types/user";
 
 export const getAllUsers = async (): Promise<I_User[]> => {
   const { data } = await applicationClient.get(apiPaths.GET_ALL_USERS);
@@ -39,5 +39,26 @@ export const addHouseholdInfo = async ({
   body: I_AddSurveyBody;
 }): Promise<I_AddSurveyResponse> => {
   const { data } = await applicationClient.post(apiPaths.ADD_SURVEY, body);
+  return data;
+};
+
+
+// ============================= Survey Intergration =============================
+
+export const registerUser = async ({
+  body,
+}: {
+  body: I_RegistrationBody;
+}): Promise<I_RegistrationResponse> => {
+  const { data } = await surveyApplicationClient.post(apiPaths.REGISTER_USER, body);
+  return data;
+};
+
+export const loginUser = async ({
+  body,
+}: {
+  body: I_LoginBody;
+}): Promise<I_LoginResponse> => {
+  const { data } = await surveyApplicationClient.post(apiPaths.LOGIN_USER, body);
   return data;
 };

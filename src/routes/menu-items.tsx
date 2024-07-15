@@ -23,14 +23,14 @@ export const MenuItems: NavLinkProps[] = [
     link: "/users",
   },
   {
-    title: "Profile",
+    title: "Register",
     icon: <></>,
-    link: "/user-profile",
+    link: "/register",
   },
   {
-    title: "Gallery-One",
+    title: "Login",
     icon: <></>,
-    link: "/gallery-one",
+    link: "/login",
   },
   {
     title: "Gallery-Two",

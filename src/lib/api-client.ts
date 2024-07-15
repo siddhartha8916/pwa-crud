@@ -2,6 +2,7 @@
 
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import appSurveyApplicationInstance from "./axios-instance/app-survey-axios-instance";
+import surveyApplicationInstance from "./axios-instance/survey-axios-instance";
 
 interface IGet {
   params?: any;
@@ -130,3 +131,4 @@ class ApiClient {
 }
 
 export const applicationClient = new ApiClient(appSurveyApplicationInstance)
+export const surveyApplicationClient = new ApiClient(surveyApplicationInstance)
