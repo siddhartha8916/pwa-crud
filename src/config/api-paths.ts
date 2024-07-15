@@ -8,6 +8,8 @@ const apiPaths = {
 
   REGISTER_USER: "/auth/signup",
   LOGIN_USER: "/auth/login",
+  CHANGE_PASSWORD: "/auth/change-password",
+  RESET_PASSWORD: "/auth/reset-password",
 };
 
 export default apiPaths;

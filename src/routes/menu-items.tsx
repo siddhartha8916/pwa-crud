@@ -33,8 +33,13 @@ export const MenuItems: NavLinkProps[] = [
     link: "/login",
   },
   {
-    title: "Gallery-Two",
+    title: "Change Password",
     icon: <></>,
-    link: "/gallery-two",
+    link: "/change-password",
+  },
+  {
+    title: "Reset Password",
+    icon: <></>,
+    link: "/reset-password",
   },
 ];

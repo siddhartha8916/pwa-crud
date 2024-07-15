@@ -45,8 +45,8 @@ export interface ErrorResponse {
   httpStatus: number;
   message: string;
   errors: {
-      field: string;
-      message: string;
+    field: string;
+    message: string;
   }[];
   timestamp: string;
 }
@@ -56,6 +56,26 @@ export interface I_LoginBody {
   password: string;
 }
 export interface I_LoginResponse {
+  token: string;
+  userName: string;
+  phone: string;
+}
+export interface I_ChangePasswordBody {
+  currentPassword: string;
+  newPassword: string;
+}
+export interface I_ChangePasswordResponse {
+  token: string;
+  userName: string;
+  phone: string;
+}
+export interface I_ResetPasswordBody {
+  phone: string;
+  password: string;
+  cropName: string;
+  farmingTool: string;
+}
+export interface I_ResetPasswordResponse {
   token: string;
   userName: string;
   phone: string;

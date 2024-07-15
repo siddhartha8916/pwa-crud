@@ -1,4 +1,4 @@
-import { addHouseholdInfo, addUser, deleteUser, getAllUsers, getPublicKey, loginUser, registerUser } from "@/api/app-survey-api";
+import { addHouseholdInfo, addUser, changePassword, deleteUser, getAllUsers, getPublicKey, loginUser, registerUser, resetPassword } from "@/api/app-survey-api";
 import queryClient from "@/lib/react-query-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -63,6 +63,18 @@ export const useRegisterUser = () => {
 export const useLoginUser = () => {
   return useMutation({
     mutationFn: loginUser,
+    retry: false,
+  });
+};
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: changePassword,
+    retry: false,
+  });
+};
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: resetPassword,
     retry: false,
   });
 };
