@@ -22,12 +22,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 // import AppFormReactSelect from "@/components/common/app-form-react-select";
-import { Option } from "@/types/user";
+import { I_AddSurveyBody, Option } from "@/types/user";
 import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { useState } from "react";
 import { modifiedResponseData } from "@/lib/validate-response";
 import { Pencil1Icon } from "@radix-ui/react-icons";
+import { useAddHouseholdInfo } from "@/services/app-survey";
 
 type Response = {
   [key: number | string]: string | number | Option[] | Response[];
@@ -38,13 +39,14 @@ const DynamicQuestionnaire = () => {
     household_eng_dynamic[0]
   );
   const [repeatQuestions, setRepeatQuestions] = useState<QuestionToRepeat[]>();
+  const { mutateAsync: addHouseholdInfo } = useAddHouseholdInfo();
   const [repeatQuestionsResponse, setRepeatQuestionsResponse] =
     useState<Response>({});
   const [currentRepeatQuestion, setCurrentRepeatQuestion] =
     useState<QuestionToRepeat>();
   const [repeatCount, setRepeatCount] = useState(0);
   const [open, setOpen] = useState(false);
-  
+
   const [repeatQuestionResponseArray, setRepeatQuestionResponseArray] =
     useState<Response[]>([]);
   const [questionOptions, setQuestionOptions] = useState<Option[]>();
@@ -84,7 +86,7 @@ const DynamicQuestionnaire = () => {
     }
   };
 
-  const printResponse = () => {
+  const printResponse = async () => {
     // const data: Response = {
     //   "1": "67",
     //   "2": [
@@ -181,7 +183,7 @@ const DynamicQuestionnaire = () => {
     //   ],
     // };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updatedData: any = {};
+    const updatedData: I_AddSurveyBody = {};
 
     Object.entries(responses).forEach(([key, value]) => {
       if (
@@ -190,7 +192,7 @@ const DynamicQuestionnaire = () => {
         typeof value[0] === "object" &&
         "value" in value[0]
       ) {
-        updatedData[key] = value[0].value; // If length is 1, add as string
+        updatedData[key] = value[0].value as string; // If length is 1, add as string
       } else if (
         Array.isArray(value) &&
         value.every(
@@ -198,14 +200,19 @@ const DynamicQuestionnaire = () => {
             typeof item === "object" && "label" in item && "value" in item
         )
       ) {
-        updatedData[key] = value.map((item) => item.value); // If length > 1 and all items have label and value, add as string[]
+        updatedData[key] = value.map((item) => item.value as string); // If length > 1 and all items have label and value, add as string[]
       } else {
-        updatedData[key] = value; // For other types of values, just copy as-is
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updatedData[key] = value as any; // For other types of values, just copy as-is
       }
     });
-    console.log("responses", responses);
-    console.log("updatedData", updatedData);
-    console.log("modifiedResponseData", modifiedResponseData());
+    // console.log("responses", responses);
+    // console.log("updatedData", updatedData);
+    // console.log("modifiedResponseData", modifiedResponseData());
+    const res = await addHouseholdInfo({
+      body: updatedData,
+    });
+    console.log('res', res)
   };
 
   const [responses, setResponses] = useState<Response>({});
@@ -476,13 +483,20 @@ const DynamicQuestionnaire = () => {
   return (
     <div>
       <div className="flex items-center justify-between">
-      <h2 className="text-lg font-medium">Dynamic Questionnaire</h2>
-      {household_eng_dynamic.findIndex(quest => quest.id === currentQuestion.id) + 1} / {household_eng_dynamic.length}
-      <Button variant={'outline'} className="p-0 w-9" onClick={() => {
-        setResponses(modifiedResponseData())
-      }}>
-        <Pencil1Icon className="p-0"/>
-      </Button>
+        <h2 className="text-lg font-medium">Dynamic Questionnaire</h2>
+        {household_eng_dynamic.findIndex(
+          (quest) => quest.id === currentQuestion.id
+        ) + 1}{" "}
+        / {household_eng_dynamic.length}
+        <Button
+          variant={"outline"}
+          className="p-0 w-9"
+          onClick={() => {
+            setResponses(modifiedResponseData());
+          }}
+        >
+          <Pencil1Icon className="p-0" />
+        </Button>
       </div>
       <Card className="max-w-[30rem] mt-5">
         <CardHeader className="pb-3">

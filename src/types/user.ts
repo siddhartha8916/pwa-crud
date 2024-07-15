@@ -17,3 +17,11 @@ export type Option = {
   value: number | string;
   label: string;
 };
+
+export type I_AddSurveyBody = {
+  [key: string]: string | string[] | { [key: string]: string | string[] };
+};
+
+export type I_AddSurveyResponse = {
+  [key: string]: string | string[] | { [key: string]: string | string[] };
+};

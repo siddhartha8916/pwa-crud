@@ -1,7 +1,7 @@
 import { QuestionTypeDynamic } from "@/data/household_module/household_eng";
 import { z, ZodError } from "zod";
 
-const apiJSONResponse: QuestionTypeDynamic[] = [
+const apiJSONQuestions: QuestionTypeDynamic[] = [
   {
     id: 1,
     question: "What is your age?",
@@ -238,9 +238,9 @@ export const QuestionTypeDynamicSchema = z.object({
 
 export const validateJSONSchema = () => {
   try {
-    // Validate each object in the apiResponse array against QuestionTypeDynamicSchema
+    // Validate each object in the apiJSONQuestions array against QuestionTypeDynamicSchema
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    apiJSONResponse.forEach((obj, _index) => {
+    apiJSONQuestions.forEach((obj, _index) => {
       //   const validatedData = QuestionTypeDynamicSchema.parse(obj);
       //   console.log(`Object at index ${index} is valid:`, validatedData);
       QuestionTypeDynamicSchema.parse(obj);
@@ -291,7 +291,7 @@ export const modifiedResponseData = () => {
   const modifiedData: Record<string, any> = {};
 
   Object.entries(apiResponseData).forEach(([key, value]) => {
-    const currentQuestionResponse = apiJSONResponse.find(
+    const currentQuestionResponse = apiJSONQuestions.find(
       (item) => item.id === Number(key)
     );
     if (currentQuestionResponse) {

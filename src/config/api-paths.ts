@@ -4,6 +4,7 @@ const apiPaths = {
   ADD_USER: "/users",
   DELETE_USER: "/users/:userId",
   PUBLIC_KEY: "/public-key",
+  ADD_SURVEY: "/add-survey",
 };
 
 export default apiPaths;

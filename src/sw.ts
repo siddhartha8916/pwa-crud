@@ -93,15 +93,20 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method === "POST" && url.pathname === "/users") {
     event.respondWith(handlePostRequest(event.request));
   }
+
+  if (event.request.method === "POST" && url.pathname === "/add-survey") {
+    event.respondWith(handlePostRequest(event.request));
+  }
 });
 
 const handlePostRequest = async (request: Request) => {
+  const clonedReq = request.clone()
   try {
-    const response = await fetch(request.clone());
+    const response = await fetch(clonedReq);
     return response;
   } catch (error) {
     await newAddedUsersQueue.pushRequest({ request: request });
-    return new Response(JSON.stringify({ message: "Adding User Failed..." }), {
+    return new Response(JSON.stringify({ message: "Request Failed..." }), {
       status: 500,
       headers: {
         "Content-Type": "application/json",

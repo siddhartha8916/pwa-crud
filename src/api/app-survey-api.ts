@@ -1,6 +1,6 @@
 import apiPaths from "@/config/api-paths";
 import { applicationClient } from "@/lib/api-client";
-import { I_AddUser_Body, I_User } from "@/types/user";
+import { I_AddSurveyBody, I_AddSurveyResponse, I_AddUser_Body, I_User } from "@/types/user";
 
 export const getAllUsers = async (): Promise<I_User[]> => {
   const { data } = await applicationClient.get(apiPaths.GET_ALL_USERS);
@@ -30,5 +30,14 @@ export const deleteUser = async ({
 
 export const getPublicKey = async (): Promise<I_User[]> => {
   const { data } = await applicationClient.get(apiPaths.PUBLIC_KEY);
+  return data;
+};
+
+export const addHouseholdInfo = async ({
+  body,
+}: {
+  body: I_AddSurveyBody;
+}): Promise<I_AddSurveyResponse> => {
+  const { data } = await applicationClient.post(apiPaths.ADD_SURVEY, body);
   return data;
 };
