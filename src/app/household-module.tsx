@@ -70,7 +70,8 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   // console.log("questionOptions", questionOptions);
 
   const getOptions = async (
-    question: QuestionTypeDynamic | QuestionToRepeat
+    question: QuestionTypeDynamic | QuestionToRepeat,
+    selectType: string
   ) => {
     if (question.options && question.options.length > 0) {
       setQuestionOptions(
@@ -81,9 +82,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       if (question.optionsResult && !question.dependentOptionsOnQuestionId) {
         const response = await fetch(question?.optionsResult);
         const data = await response.json();
-        setQuestionOptions(
-          data?.map((item: string) => ({ label: item, value: item })) || []
-        );
+        const opts: Option[] =
+          data?.map((item: string) => ({ label: item, value: item })) || [];
+        if (["single-select-others"].includes(selectType)) {
+          opts.push({ label: "Others", value: "Others" });
+        }
+        setQuestionOptions(opts);
       }
       if (question.optionsResult && question.dependentOptionsOnQuestionId) {
         const response = await fetch(question?.optionsResult);
@@ -91,12 +95,15 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         const selectedPrevRespose = (
           responses[question.prevQuestionId!] as Option[]
         )?.[0].value;
-        setQuestionOptions(
+        const opts: Option[] =
           data[selectedPrevRespose]?.map((item: string) => ({
             label: item,
             value: item,
-          })) || []
-        );
+          })) || [];
+        if (["single-select-others"].includes(selectType)) {
+          opts.push({ label: "Others", value: "Others" });
+        }
+        setQuestionOptions(opts);
       }
     }
   };
@@ -161,8 +168,15 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   };
 
   const [responses, setResponses] = useState<Response>({});
+  const [multiSelectConditionalResponses, setMultiSelectConditionalResponses] =
+    useState<Response>({});
   // console.log("repeatQuestionsResponse", repeatQuestionsResponse);
   // console.log("repeatCount", repeatCount);
+  console.log(
+    "multiSelectConditionalResponses :>> ",
+    multiSelectConditionalResponses
+  );
+
   const renderQuestion = (
     question: QuestionTypeDynamic,
     responsesData: Response,
@@ -191,7 +205,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "single-select":
         if (!questionOptions) {
-          getOptions(question);
+          getOptions(question, "single-select");
         }
         return (
           <AppFormReactSelect
@@ -214,10 +228,11 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "single-select-others":
         if (!questionOptions) {
-          getOptions(question);
+          getOptions(question, "single-select-others");
         }
+        // console.log('questionOptio ', questionOptions);
         return (
-          <AppCreateableReactSelect
+          <AppFormReactSelect
             options={questionOptions || []}
             label=""
             isOptionsLoading={false}
@@ -237,7 +252,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "multi-select":
         if (!questionOptions) {
-          getOptions(question);
+          getOptions(question, "multi-select");
         }
 
         return (
@@ -261,7 +276,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "multi-select-others":
         if (!questionOptions) {
-          getOptions(question);
+          getOptions(question, "multi-select-others");
         }
 
         return (
@@ -285,7 +300,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "multi-select-conditional":
         if (!questionOptions) {
-          getOptions(question);
+          getOptions(question, "multi-select-conditional");
         }
 
         return (
@@ -324,20 +339,18 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "date":
         return (
-          <>
-            <Input
-              id={question.id.toString()}
-              value={(responsesData[question.id] as string) || ""}
-              onChange={(event) =>
-                handleInputChange(
-                  question.id,
-                  event.target.value,
-                  setResponseData
-                )
-              }
-              type="date"
-            />
-          </>
+          <Input
+            id={question.id.toString()}
+            value={(responsesData[question.id] as string) || ""}
+            onChange={(event) =>
+              handleInputChange(
+                question.id,
+                event.target.value,
+                setResponseData
+              )
+            }
+            type="date"
+          />
         );
 
       default:
@@ -356,8 +369,16 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   const handleNextClick = () => {
     // Increment the current question index to show the next question
     setCurrentMultiSelectConditionalQuestionIndex((prevIndex) => prevIndex + 1);
-    if (currentMultiSelectConditionalQuestionIndex === newMultiSelectQuestions.length - 1) {
-      setOpenMultiSelectConditionalDialog(false)
+    if (
+      currentMultiSelectConditionalQuestionIndex ===
+      newMultiSelectQuestions.length - 1
+    ) {
+      setOpenMultiSelectConditionalDialog(false);
+      setResponses((prevData) => ({
+        ...prevData,
+        ...multiSelectConditionalResponses,
+      }));
+      setMultiSelectConditionalResponses({});
     }
   };
 
@@ -385,7 +406,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       newMultiSelectQuestions = filteredQuestions;
       // console.log("filteredQuestions :>> ", filteredQuestions);
       setCurrentMultiSelectConditionalQuestionIndex(0);
-      setOpenMultiSelectConditionalDialog(true)
+      setOpenMultiSelectConditionalDialog(true);
       return;
     }
 
@@ -517,7 +538,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   };
 
   // console.log("responses", responses);
-
+console.log('currentQuestion :>> ', currentQuestion);
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -651,8 +672,8 @@ const HouseholdModuleDynamicQuestionnaire = () => {
                 newMultiSelectQuestions[
                   currentMultiSelectConditionalQuestionIndex
                 ],
-                repeatQuestionsResponse,
-                setRepeatQuestionsResponse
+                multiSelectConditionalResponses,
+                setMultiSelectConditionalResponses
               )}
           </div>
           <div className="flex items-center justify-between w-full">
@@ -665,10 +686,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      <Button type="submit" className="mt-5" onClick={printResponse}>
-        Submit
-      </Button>
+  
+      {currentQuestion.nextQuestionId === "submit_survey" && (
+        <Button type="submit" className="mt-5" onClick={printResponse}>
+          Submit
+        </Button>
+      )}
     </div>
   );
 };
