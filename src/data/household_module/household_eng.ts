@@ -144,37 +144,61 @@ export const householdMembersQuestion = {
 };
 
 export type QuestionTypeDynamic = {
-  id: number;
+  // ID of the question
+  id: number | string;
+  // Question Text
   question: string;
+  // Type of the questions, like number, text, select, etc
   type: string;
+  // Only add this is the type is select. Populate with string[].
+  // If options are to be fetched from backend provide empty array
+  // Add the api URL value to optionsResult string property next to fetch data as string[]
   options?: string[];
   optionsResult?: string;
-  dependentOnQuestionId?: number;
+  // Add this in case you want the question options to be dependent on some other question value
+  dependentOptionsOnQuestionId?: number | string;
+  // Validation rules for the question defined in Validation Rules property
   validationRule: number;
+  // Simple text description or some hint to be displayed below the question
   instructions: string;
-  nextQuestionId?: number | null;
-  prevQuestionId: number | null;
+  // Provide next question id to jump If next button is clicked
+  // Next Question id to be null if the question contains some conditions based on selection
+  nextQuestionId?: number | string | null;
+  // Provide previous question id to jump if prev button is clicked
+  prevQuestionId: number | string | null;
+  // Add conditions if the next question is based on some selected value
   conditions?: {
+    // Value to match the condition
     showIf: string;
-    nextQuestionId: number;
-    elseQuestionId: number;
+    // Next question if value matches
+    nextQuestionId: number | string;
+    // Else question if value not matches
+    elseQuestionId: number | string;
   };
+  // Enable Some question to be used as loop
   repeatFlag?: boolean;
+  // What all questions to loop at
   questionsToRepeat?: QuestionToRepeat[];
+
+  showIfMultiConditionalValue?: string | number;
+  choiceBaseQuestionId?: string | number;
 };
 
 export type QuestionToRepeat = {
-  id: number;
+  // Instructions similar to that of QuestionTypeDynamic
+  id: number | string;
   question: string;
   type: string;
   options?: string[];
   optionsResult?: string;
-  dependentOnQuestionId?:number
+  dependentOptionsOnQuestionId?: number | string;
   validationRule: number;
   instructions: string;
-  nextQuestionId?: number | null;
-  prevQuestionId: number | null;
-  loopHeadingQuestionId: number;
+  nextQuestionId?: number | string | null;
+  prevQuestionId: number | string | null;
+  // Loop's main question id to provide some info about which question user is filling information
+  // The value for loop's main question will be populated
+  loopHeadingQuestionId: number | string;
 };
 
 export const validationRule = {
@@ -218,7 +242,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     optionsResult:
       "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",
     validationRule: 7,
-    dependentOnQuestionId: 2,
+    dependentOptionsOnQuestionId: 2,
     prevQuestionId: 2,
     nextQuestionId: 4,
   },
@@ -230,7 +254,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     options: [],
     optionsResult:
       "https://pwa-api.brainstacktechnologies.com/api/v1/commune-hill",
-    dependentOnQuestionId: 3,
+    dependentOptionsOnQuestionId: 3,
     validationRule: 7,
     prevQuestionId: 3,
     nextQuestionId: 5,
@@ -243,7 +267,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     options: [],
     optionsResult:
       "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
-    dependentOnQuestionId: 4,
+    dependentOptionsOnQuestionId: 4,
     validationRule: 7,
     prevQuestionId: 4,
     nextQuestionId: 6,
@@ -383,6 +407,337 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     options: ["Comic", "Horror", "Thriller", "Sci-Fi", "Others"],
     validationRule: 7,
     prevQuestionId: 15,
+    nextQuestionId: null,
+  },
+];
+
+export const household_module_questions: QuestionTypeDynamic[] = [
+  // {
+  //   id: "gps",
+  //   question: "GPS location",
+  //   type: "gps",
+  //   validationRule: 1,
+  //   instructions: "Please select your GPS location...",
+  //   nextQuestionId: "province",
+  //   prevQuestionId: null,
+  // },
+  // {
+  //   id: "province",
+  //   question: "Please select province",
+  //   instructions: "Please select the province that apply...",
+  //   type: "single-select",
+  //   options: [],
+  //   optionsResult: "https://pwa-api.brainstacktechnologies.com/api/v1/province",
+  //   validationRule: 7,
+  //   prevQuestionId: "gps",
+  //   nextQuestionId: "commune",
+  // },
+  // {
+  //   id: "commune",
+  //   question: "Please select commune",
+  //   instructions: "Select the commune within the chosen province.",
+  //   type: "single-select",
+  //   options: [],
+  //   optionsResult:
+  //     "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",
+  //   validationRule: 7,
+  //   dependentOptionsOnQuestionId: "province",
+  //   prevQuestionId: "province",
+  //   nextQuestionId: "hill_coline",
+  // },
+  // {
+  //   id: "hill_coline",
+  //   question: "Please select Hill - Coline",
+  //   instructions: "Select the hill_coline within the chosen commune.",
+  //   type: "single-select-others",
+  //   options: [],
+  //   optionsResult:
+  //     "https://pwa-api.brainstacktechnologies.com/api/v1/commune-hill",
+  //   dependentOptionsOnQuestionId: "commune",
+  //   validationRule: 7,
+  //   prevQuestionId: "commune",
+  //   nextQuestionId: "subhill",
+  // },
+  // {
+  //   id: "subhill",
+  //   question: "Please select Subhill",
+  //   instructions: "Select the subhill within the chosen hill_coline.",
+  //   type: "single-select-others",
+  //   options: [],
+  //   optionsResult:
+  //     "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
+  //   dependentOptionsOnQuestionId: 4,
+  //   validationRule: 7,
+  //   prevQuestionId: "hill_coline",
+  //   nextQuestionId: "hh_members_quantity",
+  // },
+  // {
+  //   id: "hh_members_quantity",
+  //   question: "How many members make up your household ?",
+  //   instructions: "Please enter the count of household members...",
+  //   type: "number",
+  //   validationRule: 1,
+  //   prevQuestionId: "subhill",
+  //   nextQuestionId: "hh_perm_workers",
+  //   questionsToRepeat: [
+  //     {
+  //       id: "hh_name",
+  //       question: "Name of household member - ",
+  //       type: "text",
+  //       validationRule: 1,
+  //       instructions: "Please enter the member name...",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: null,
+  //       nextQuestionId: "hh_surname",
+  //     },
+  //     {
+  //       id: "hh_surname",
+  //       question: "Surname of household member?",
+  //       type: "number",
+  //       validationRule: 1,
+  //       instructions: "Please enter the member age...",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "hh_name",
+  //       nextQuestionId: "sex",
+  //     },
+  //     {
+  //       id: "sex",
+  //       question: "Gender of household member?",
+  //       type: "single-select",
+  //       options: ["Male", "Female"],
+  //       validationRule: 1,
+  //       instructions: "Please enter the gender for",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "hh_surname",
+  //       nextQuestionId: "dob",
+  //     },
+  //     {
+  //       id: "dob",
+  //       question: "Date of Birth of household member?",
+  //       type: "date",
+  //       validationRule: 1,
+  //       instructions: "Please enter the date of birth for",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "sex",
+  //       nextQuestionId: "literacy",
+  //     },
+  //     {
+  //       id: "literacy",
+  //       question: "Can household member read and write?",
+  //       type: "single-select",
+  //       options: ["Yes", "No"],
+  //       validationRule: 1,
+  //       instructions: "Please enter the date of birth for",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "dob",
+  //       nextQuestionId: "education",
+  //     },
+  //     {
+  //       id: "education",
+  //       question: "Household member education level",
+  //       type: "single-select",
+  //       options: [
+  //         "None",
+  //         "Ecole primaire (1-6)",
+  //         "Enseignement fondamental (1-9)",
+  //         "Collège (7-10)",
+  //         "Lycée général (11–13)",
+  //         "Études postfondamentales générales (10–12)",
+  //         "Collège- Lycée technique (7–13)",
+  //         "Enseignement secondaire technique (10–12)",
+  //         "University",
+  //       ],
+  //       validationRule: 1,
+  //       instructions: "Please enter the education level for",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "literacy",
+  //       nextQuestionId: "hh_relationship",
+  //     },
+  //     {
+  //       id: "hh_relationship",
+  //       question: "Relation of household member with HH head",
+  //       type: "single-select-others",
+  //       options: [
+  //         "Self (I am the hh head)",
+  //         "Spouse",
+  //         "Son/ daughter",
+  //         "Father/mother",
+  //       ],
+  //       validationRule: 1,
+  //       instructions:
+  //         "Please select the relation. If not found enter and press create",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "education",
+  //       nextQuestionId: "hh_activities",
+  //     },
+  //     {
+  //       id: "hh_activities",
+  //       question: "What economic activities are performed by - ",
+  //       type: "multi-select-others",
+  //       options: [
+  //         "Coffee production and sales",
+  //         "Other crop production and sales",
+  //         "Livestock raising and sales",
+  //         "Livestock by-product production and sale",
+  //         "Business outside farm",
+  //         "Employment outside farm",
+  //         "Temporary labor outside farm",
+  //         "None",
+  //       ],
+  //       validationRule: 1,
+  //       instructions:
+  //         "Please select the activities performed by the member. If not found enter and press create",
+  //       loopHeadingQuestionId: "hh_name",
+  //       prevQuestionId: "hh_relationship",
+  //       nextQuestionId: null,
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "hh_perm_workers",
+  //   question: "Does the household have permanent workers for the farm?",
+  //   instructions:
+  //     "Permanent hired labor refers to employees contracted for long-term or indefinite work with consistent wages and benefits",
+  //   type: "single-select",
+  //   options: ["Yes", "No"],
+  //   prevQuestionId: "hh_members_quantity",
+  //   conditions: {
+  //     showIf: "Yes",
+  //     nextQuestionId: "hh_perm_workers_salary",
+  //     elseQuestionId: "hh_assets",
+  //   },
+  //   validationRule: 7,
+  // },
+  // {
+  //   id: "hh_perm_workers_salary",
+  //   question: "Monthly salary for one permanent worker?",
+  //   instructions:
+  //     "Average monthly salary paid to a permanent worker who works in any farm activity.",
+  //   type: "text",
+  //   validationRule: 7,
+  //   prevQuestionId: "hh_perm_workers",
+  //   nextQuestionId: "hh_perm_workers_days_week",
+  // },
+  // {
+  //   id: "hh_perm_workers_days_week",
+  //   question: "Total days per week worked by one permanent worker",
+  //   instructions:
+  //     "Average number of days worked per week by a permanent worker on the farm for all activities.",
+  //   type: "single-select",
+  //   options: ["1", "2", "3", "4", "5", "6", "7"],
+  //   validationRule: 7,
+  //   prevQuestionId: "hh_perm_workers_salary",
+  //   nextQuestionId: "hh_perm_workers_hr_day",
+  // },
+  // {
+  //   id: "hh_perm_workers_hr_day",
+  //   question: "Total hours per day worked by one permanent worker",
+  //   instructions:
+  //     "Average number of hours worked per day by a permanent worker on the farm for all activities.",
+  //   type: "single-select",
+  //   options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+  //   validationRule: 7,
+  //   prevQuestionId: "hh_perm_workers_days_week",
+  //   nextQuestionId: "hh_assets",
+  // },
+  {
+    id: "hh_assets",
+    question: "Select items currently owned by the household",
+    instructions:
+      "Average number of hours worked per day by a permanent worker on the farm for all activities.",
+    type: "multi-select-conditional",
+    options: [
+      "None",
+      "Bed or drying mat",
+      "Bicycles",
+      "Car",
+      "Concrete patios (useful life of approximately 10 years)",
+      "Domestic scale processing equipment",
+      "Fermentation boxes",
+      "Harvest baskets",
+      "Harvest hooks",
+      "Hoes, machetes",
+      "Irrigation equipment (pumps, pipes, etc.)",
+      "Power generation equipment",
+      "Storage or processing structures",
+      "Motorcycles",
+      "Office equipment (for example, computers)",
+      "Pruning implements",
+      "Spray equipment",
+      "Telephone",
+      "Tractors",
+      "Vans",
+      "Wheelbarrows or wagons",
+      "Others",
+    ],
+    validationRule: 7,
+    prevQuestionId: "hh_perm_workers_hr_day",
+    nextQuestionId: null,
+  },
+  {
+    id: "hh_assets_bed_num",
+    choiceBaseQuestionId: "hh_assets",
+    showIfMultiConditionalValue: "Bed or drying mat",
+    question: "How many beds or drying mats?",
+    type: "text",
+    validationRule: 1,
+    instructions: "Please enter the number of beds or drying mats",
+    prevQuestionId: null,
+    nextQuestionId: null,
+  },
+  {
+    id: "hh_assets_bed_value",
+    choiceBaseQuestionId: "hh_assets",
+    showIfMultiConditionalValue: "Bed or drying mat",
+    question: "Value beds or drying mats?",
+    type: "text",
+    validationRule: 1,
+    instructions: "Please enter the Value beds or drying mats",
+    prevQuestionId: null,
+    nextQuestionId: null,
+  },
+  {
+    id: "hh_assets_bicycles_num",
+    choiceBaseQuestionId: "hh_assets",
+    showIfMultiConditionalValue: "Bicycles",
+    question: "How many bicycles?",
+    type: "text",
+    validationRule: 1,
+    instructions: "Please enter the number of bicycles",
+    prevQuestionId: null,
+    nextQuestionId: null,
+  },
+  {
+    id: "hh_assets_bicycles_value",
+    choiceBaseQuestionId: "hh_assets",
+    showIfMultiConditionalValue: "Bicycles",
+    question: "Value bicycles?",
+    type: "text",
+    validationRule: 1,
+    instructions: "Please enter the value of bicycles",
+    prevQuestionId: null,
+    nextQuestionId: null,
+  },
+  {
+    id: "hh_assets_cars_num",
+    choiceBaseQuestionId: "hh_assets",
+    showIfMultiConditionalValue: "Car",
+    question: "How many cars?",
+    type: "text",
+    validationRule: 1,
+    instructions: "Please enter the number of cars",
+    prevQuestionId: null,
+    nextQuestionId: null,
+  },
+  {
+    id: "hh_assets_cars_value",
+    choiceBaseQuestionId: "hh_assets",
+    showIfMultiConditionalValue: "Car",
+    question: "Value cars?",
+    type: "text",
+    validationRule: 1,
+    instructions: "Please enter the value of cars",
+    prevQuestionId: null,
     nextQuestionId: null,
   },
 ];

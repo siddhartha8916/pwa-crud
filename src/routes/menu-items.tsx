@@ -42,4 +42,9 @@ export const MenuItems: NavLinkProps[] = [
     icon: <></>,
     link: "/reset-password",
   },
+  {
+    title: "Household",
+    icon: <></>,
+    link: "/survey/household",
+  },
 ];

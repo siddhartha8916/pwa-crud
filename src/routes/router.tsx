@@ -1,6 +1,7 @@
 import AddSurvey from "@/app/add-survey";
 import AddSurveyDynamic from "@/app/add-survey-dynamic";
 import ChangePassword from "@/app/change-password";
+import HouseholdModuleDynamicQuestionnaire from "@/app/household-module";
 import LanguageSelectionComponent from "@/app/language-selection";
 import LoginUser from "@/app/login-user";
 import RegisterUser from "@/app/register-user";
@@ -24,6 +25,7 @@ const Router = () => {
         <Route path="users" element={<UserPage />} />
         <Route path="user-profile" element={<>User Profile</>} />
         <Route path="survey" element={<AddSurvey />} />
+        <Route path="survey/household" element={<HouseholdModuleDynamicQuestionnaire />} />
         <Route path="dynamic-survey" element={<AddSurveyDynamic />} />
       </Route>
 

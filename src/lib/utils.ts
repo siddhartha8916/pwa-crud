@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { APPLICATION_CACHE, PUBLIC_KEY } from "@/config/constants";
@@ -239,11 +240,61 @@ export async function saveTokenToCache(token: string) {
 
 export async function getTokenFromCache() {
   try {
-    const res = await fetch('https://pwa-api.brainstacktechnologies.com/token');
-    const token = await res.text()
+    const res = await fetch("https://pwa-api.brainstacktechnologies.com/token");
+    const token = await res.text();
     return token;
   } catch (error) {
     console.log("error getting token from cache :>> ", error);
     return null;
   }
+}
+
+interface KeyValueObject {
+  [key: string]: any;
+}
+
+interface LabelValuePair {
+  label: string;
+  value: string;
+}
+
+export function convertToArrayOfValues(obj: any): any {
+  // Ensure obj is an object and not null
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  // If obj is an array, map over its elements
+  if (Array.isArray(obj)) {
+    return obj.map((item) => convertToArrayOfValues(item));
+  }
+
+  // Otherwise, obj is an object
+  const newObj: KeyValueObject = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // Recursively convert nested objects
+      newObj[key] = convertToArrayOfValues(obj[key]);
+
+      // Check if the current property is an array with objects having 'label' and 'value' properties
+      if (
+        Array.isArray(newObj[key]) &&
+        newObj[key].every(
+          (item: any) =>
+            typeof item === "object" &&
+            item !== null &&
+            "label" in item &&
+            "value" in item
+        )
+      ) {
+        // Determine how to format based on the length of the array
+        if (newObj[key].length === 1) {
+          newObj[key] = (newObj[key][0] as LabelValuePair).value; // Convert to a single string value
+        } else {
+          newObj[key] = newObj[key].map((item: LabelValuePair) => item.value); // Convert to an array of string values
+        }
+      }
+    }
+  }
+  return newObj;
 }

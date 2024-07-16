@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import {
-  household_eng_dynamic,
+  household_module_questions,
   QuestionToRepeat,
   QuestionTypeDynamic,
 } from "@/data/household_module/household_eng";
@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-// import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -21,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { I_AddSurveyBody, Option } from "@/types/user";
 import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 import AppFormReactSelect from "@/components/common/app-form-react-select";
@@ -29,14 +27,21 @@ import { useState } from "react";
 import { modifiedResponseData } from "@/lib/validate-response";
 import { Pencil1Icon } from "@radix-ui/react-icons";
 import { useAddHouseholdInfo } from "@/services/app-survey";
+import {
+  convertToArrayOfValues,
+  getCurrentPosition,
+  requestGeolocationPermission,
+} from "@/lib/utils";
+
+let newMultiSelectQuestions: QuestionTypeDynamic[] = [];
 
 type Response = {
   [key: number | string]: string | number | Option[] | Response[];
 };
 
-const DynamicQuestionnaire = () => {
+const HouseholdModuleDynamicQuestionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
-    household_eng_dynamic[0]
+    household_module_questions[0]
   );
   const [repeatQuestions, setRepeatQuestions] = useState<QuestionToRepeat[]>();
   const { mutateAsync: addHouseholdInfo } = useAddHouseholdInfo();
@@ -50,6 +55,16 @@ const DynamicQuestionnaire = () => {
   const [repeatQuestionResponseArray, setRepeatQuestionResponseArray] =
     useState<Response[]>([]);
   const [questionOptions, setQuestionOptions] = useState<Option[]>();
+
+  const [
+    openMultiSelectConditionalDialog,
+    setOpenMultiSelectConditionalDialog,
+  ] = useState(false);
+  const [
+    currentMultiSelectConditionalQuestionIndex,
+    setCurrentMultiSelectConditionalQuestionIndex,
+  ] = useState(0);
+
   // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
 
   // console.log("questionOptions", questionOptions);
@@ -87,101 +102,6 @@ const DynamicQuestionnaire = () => {
   };
 
   const printResponse = async () => {
-    // const data: Response = {
-    //   "1": "67",
-    //   "2": [
-    //     {
-    //       label: "Bubanza",
-    //       value: "Bubanza",
-    //     },
-    //   ],
-    //   "3": [
-    //     {
-    //       label: "Gihanga",
-    //       value: "Gihanga",
-    //     },
-    //   ],
-    //   "4": [
-    //     {
-    //       label: "Domaine Militaire",
-    //       value: "Domaine Militaire",
-    //     },
-    //   ],
-    //   "5": [
-    //     {
-    //       label: "Domaine Militaire",
-    //       value: "Domaine Militaire",
-    //     },
-    //   ],
-    //   "6": [
-    //     {
-    //       label: "No",
-    //       value: "No",
-    //     },
-    //   ],
-    //   "9": [
-    //     {
-    //       label: "Yes",
-    //       value: "Yes",
-    //     },
-    //   ],
-    //   "10": [
-    //     {
-    //       label: "Dog",
-    //       value: "Dog",
-    //     },
-    //     {
-    //       label: "Cat",
-    //       value: "Cat",
-    //     },
-    //     {
-    //       label: "Bird",
-    //       value: "Bird",
-    //     },
-    //   ],
-    //   "11": "6",
-    //   "12": "siddhartha@gmail.com",
-    //   "13": [
-    //     {
-    //       label: "English",
-    //       value: "English",
-    //     },
-    //   ],
-    //   "14": [
-    //     {
-    //       label: "Reading",
-    //       value: "Reading",
-    //     },
-    //     {
-    //       label: "Sports",
-    //       value: "Sports",
-    //     },
-    //   ],
-    //   "15": [
-    //     {
-    //       "111": "Archana Kumari",
-    //       "222": "43",
-    //     },
-    //     {
-    //       "111": "Ratna Priya",
-    //       "222": "26",
-    //     },
-    //     {
-    //       "111": "Manoj Singh",
-    //       "222": "55",
-    //     },
-    //   ],
-    //   "16": [
-    //     {
-    //       label: "Comic",
-    //       value: "Comic",
-    //     },
-    //     {
-    //       label: "Horror",
-    //       value: "Horror",
-    //     },
-    //   ],
-    // };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updatedData: I_AddSurveyBody = {};
 
@@ -207,12 +127,37 @@ const DynamicQuestionnaire = () => {
       }
     });
     // console.log("responses", responses);
+    const formattedData = convertToArrayOfValues(updatedData);
     // console.log("updatedData", updatedData);
+    console.log("formattedData", formattedData);
     // console.log("modifiedResponseData", modifiedResponseData());
     const res = await addHouseholdInfo({
-      body: updatedData,
+      body: formattedData,
     });
-    console.log('res', res)
+    console.log("res", res);
+  };
+
+  const getUserLocation = async (
+    questId: string | number,
+    setResponseData: React.Dispatch<React.SetStateAction<Response>>
+  ) => {
+    console.log("Getting User Location :>> ");
+    try {
+      await requestGeolocationPermission();
+      const position = await getCurrentPosition();
+      handleInputChange(
+        questId,
+        `${position.coords.latitude}, ${position.coords.longitude}`,
+        setResponseData
+      );
+    } catch (error) {
+      console.log("error :>> ", error);
+      if (error instanceof GeolocationPositionError) {
+        if (error.code === 1) {
+          alert(error.message);
+        }
+      }
+    }
   };
 
   const [responses, setResponses] = useState<Response>({});
@@ -338,6 +283,63 @@ const DynamicQuestionnaire = () => {
             }}
           />
         );
+      case "multi-select-conditional":
+        if (!questionOptions) {
+          getOptions(question);
+        }
+
+        return (
+          <AppCreateableReactSelect
+            options={questionOptions || []}
+            label=""
+            isOptionsLoading={false}
+            placeholder={question.question}
+            selectType="multi"
+            direction="column"
+            className="col-span-2 -mt-1"
+            selected={
+              responsesData[question.id]
+                ? (responsesData[question.id] as Option[])
+                : null
+            }
+            setSelected={(value) => {
+              handleInputChange(question.id, value, setResponseData);
+            }}
+          />
+        );
+      case "gps":
+        return (
+          <>
+            <Input
+              id={question.id.toString()}
+              value={(responsesData[question.id] as string) || ""}
+              disabled
+            />
+            <Button
+              onClick={() => getUserLocation(question.id, setResponseData)}
+            >
+              Get Location
+            </Button>
+          </>
+        );
+      case "date":
+        return (
+          <>
+            <Input
+              id={question.id.toString()}
+              value={(responsesData[question.id] as string) || ""}
+              onChange={(event) =>
+                handleInputChange(
+                  question.id,
+                  event.target.value,
+                  setResponseData
+                )
+              }
+              type="date"
+            />
+          </>
+        );
+
       default:
         return null;
     }
@@ -351,8 +353,42 @@ const DynamicQuestionnaire = () => {
     setResponseData((prevData) => ({ ...prevData, [id]: value }));
   };
 
+  const handleNextClick = () => {
+    // Increment the current question index to show the next question
+    setCurrentMultiSelectConditionalQuestionIndex((prevIndex) => prevIndex + 1);
+    if (currentMultiSelectConditionalQuestionIndex === newMultiSelectQuestions.length - 1) {
+      setOpenMultiSelectConditionalDialog(false)
+    }
+  };
+
+  const handlePreviousClick = () => {
+    // Decrement the current question index to show the previous question
+    setCurrentMultiSelectConditionalQuestionIndex((prevIndex) => prevIndex - 1);
+  };
+
   const handleNextQuestion = (question: QuestionTypeDynamic) => {
     setQuestionOptions(undefined);
+
+    if (question.type === "multi-select-conditional") {
+      //
+      const value = responses[question.id];
+      const selectedOptions = (value as Option[]).map((item) => item.value);
+      // console.log("selectedOptions :>> ", selectedOptions);
+      const nextQuestionsBasedOnSelectedQuestions =
+        household_module_questions.filter(
+          (item) => item.choiceBaseQuestionId === question.id
+        );
+      const filteredQuestions = nextQuestionsBasedOnSelectedQuestions.filter(
+        (item) => selectedOptions.includes(item.showIfMultiConditionalValue!)
+      );
+      // setMultiSelectQuestions(filteredQuestions);
+      newMultiSelectQuestions = filteredQuestions;
+      // console.log("filteredQuestions :>> ", filteredQuestions);
+      setCurrentMultiSelectConditionalQuestionIndex(0);
+      setOpenMultiSelectConditionalDialog(true)
+      return;
+    }
+
     // Dont do anything if next question id is null
     if (!question?.nextQuestionId && !question?.conditions?.nextQuestionId) {
       return;
@@ -369,20 +405,22 @@ const DynamicQuestionnaire = () => {
       return;
     }
 
+    //
+
     // If we have some conditions then based on that navigate to either next question or else question
     if (question.conditions) {
       if (
         question.conditions.showIf ===
         (responses[question.id] as Option[])?.[0].value
       ) {
-        const next = household_eng_dynamic.find(
+        const next = household_module_questions.find(
           (item) => item.id === question?.conditions?.nextQuestionId
         );
         if (next) {
           setCurrentQuestion(next);
         }
       } else {
-        const next = household_eng_dynamic.find(
+        const next = household_module_questions.find(
           (item) => item.id === question?.conditions?.elseQuestionId
         );
         if (next) {
@@ -391,7 +429,7 @@ const DynamicQuestionnaire = () => {
       }
       // If we donot have conditions then just set the next question id
     } else {
-      const next = household_eng_dynamic.find(
+      const next = household_module_questions.find(
         (item) => item.id === question?.nextQuestionId
       );
       if (next) {
@@ -410,7 +448,7 @@ const DynamicQuestionnaire = () => {
     if (!question?.prevQuestionId) {
       return;
     }
-    const prev = household_eng_dynamic.find(
+    const prev = household_module_questions.find(
       (item) => item.id === question.prevQuestionId
     );
     if (prev) {
@@ -444,7 +482,7 @@ const DynamicQuestionnaire = () => {
           setCurrentRepeatQuestion(undefined);
           setRepeatCount(0);
           setOpen(false);
-          const next = household_eng_dynamic?.find(
+          const next = household_module_questions?.find(
             (item) => item.id === currentQuestion?.nextQuestionId
           );
           if (next) {
@@ -483,11 +521,11 @@ const DynamicQuestionnaire = () => {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Dynamic Questionnaire</h2>
-        {household_eng_dynamic.findIndex(
+        <h2 className="text-lg font-medium">Household Dynamic Questionnaire</h2>
+        {household_module_questions.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}
-        / {household_eng_dynamic.length}
+        / {household_module_questions.length}
         <Button
           variant={"outline"}
           className="p-0 w-9"
@@ -498,6 +536,7 @@ const DynamicQuestionnaire = () => {
           <Pencil1Icon className="p-0" />
         </Button>
       </div>
+
       <Card className="max-w-[30rem] mt-5">
         <CardHeader className="pb-3">
           <CardTitle>{currentQuestion.question}</CardTitle>
@@ -580,6 +619,53 @@ const DynamicQuestionnaire = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog
+        open={openMultiSelectConditionalDialog}
+        onOpenChange={setOpenMultiSelectConditionalDialog}
+      >
+        <DialogContent
+          className="sm:max-w-[425px] top-[20%]"
+          onInteractOutside={(event) => event.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {
+                newMultiSelectQuestions[
+                  currentMultiSelectConditionalQuestionIndex
+                ]?.question
+              }
+            </DialogTitle>
+            <DialogDescription>
+              {
+                newMultiSelectQuestions[
+                  currentMultiSelectConditionalQuestionIndex
+                ]?.instructions
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {newMultiSelectQuestions[
+              currentMultiSelectConditionalQuestionIndex
+            ] &&
+              renderQuestion(
+                newMultiSelectQuestions[
+                  currentMultiSelectConditionalQuestionIndex
+                ],
+                repeatQuestionsResponse,
+                setRepeatQuestionsResponse
+              )}
+          </div>
+          <div className="flex items-center justify-between w-full">
+            <Button type="button" onClick={() => handlePreviousClick()}>
+              Prev
+            </Button>
+            <Button type="button" onClick={() => handleNextClick()}>
+              Next
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Button type="submit" className="mt-5" onClick={printResponse}>
         Submit
       </Button>
@@ -587,4 +673,4 @@ const DynamicQuestionnaire = () => {
   );
 };
 
-export default DynamicQuestionnaire;
+export default HouseholdModuleDynamicQuestionnaire;
