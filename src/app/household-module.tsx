@@ -91,16 +91,22 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       if (question.optionsResult && question.dependentOptionsOnQuestionId) {
         const response = await fetch(question?.optionsResult);
         const data = await response.json();
-        const selectedPrevRespose = (
-          responses[question.prevQuestionId!] as Option[]
-        )?.[0].value;
-        const opts: Option[] =
-          data[selectedPrevRespose]?.map((item: string) => ({
-            label: item,
-            value: item,
-          })) || [];
-        if (["single-select-others"].includes(selectType)) {
-          opts.push({ label: "Others", value: "Others" });
+        const dependentQuestion = household_module_questions.find(
+          (item) => item.id === question.dependentOptionsOnQuestionId
+        );
+        let opts: Option[] = [];
+        if (dependentQuestion) {
+          const selectedPrevRespose = (
+            responses[dependentQuestion.apiName!] as Option[]
+          )?.[0].value;
+          opts =
+            data[selectedPrevRespose]?.map((item: string) => ({
+              label: item,
+              value: item,
+            })) || [];
+          if (["single-select-others"].includes(selectType)) {
+            opts.push({ label: "Others", value: "Others" });
+          }
         }
         setQuestionOptions(opts);
       }

@@ -507,7 +507,7 @@ export const household_module_questions: QuestionTypeDynamic[] = [
     options: [],
     optionsResult:
       "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
-    dependentOptionsOnQuestionId: 4,
+    dependentOptionsOnQuestionId: 'hill_coline',
     validationRule: 7,
     prevQuestionId: "hill_coline",
     conditions: {
