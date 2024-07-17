@@ -148,7 +148,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     questId: string | number,
     setResponseData: React.Dispatch<React.SetStateAction<Response>>
   ) => {
-    console.log("Getting User Location :>> ");
+    // console.log("Getting User Location :>> ");
     try {
       await requestGeolocationPermission();
       const position = await getCurrentPosition();
@@ -172,10 +172,10 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     useState<Response>({});
   // console.log("repeatQuestionsResponse", repeatQuestionsResponse);
   // console.log("repeatCount", repeatCount);
-  console.log(
-    "multiSelectConditionalResponses :>> ",
-    multiSelectConditionalResponses
-  );
+  // console.log(
+  //   "multiSelectConditionalResponses :>> ",
+  //   multiSelectConditionalResponses
+  // );
 
   const renderQuestion = (
     question: QuestionTypeDynamic,
@@ -390,17 +390,16 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   const handleNextQuestion = (question: QuestionTypeDynamic) => {
     setQuestionOptions(undefined);
 
-    if (question.type === "multi-select-conditional") {
+    if (
+      question.type === "multi-select-conditional" &&
+      question?.conditionalQuestions
+    ) {
       //
       const value = responses[question.id];
       const selectedOptions = (value as Option[]).map((item) => item.value);
-      // console.log("selectedOptions :>> ", selectedOptions);
-      const nextQuestionsBasedOnSelectedQuestions =
-        household_module_questions.filter(
-          (item) => item.choiceBaseQuestionId === question.id
-        );
-      const filteredQuestions = nextQuestionsBasedOnSelectedQuestions.filter(
-        (item) => selectedOptions.includes(item.showIfMultiConditionalValue!)
+
+      const filteredQuestions = question.conditionalQuestions.filter((item) =>
+        selectedOptions.includes(item.showIfMultiConditionalValue!)
       );
       // setMultiSelectQuestions(filteredQuestions);
       newMultiSelectQuestions = filteredQuestions;
@@ -417,7 +416,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
 
     if (
       question.questionsToRepeat &&
-      typeof responses[question.id] !== "object"
+      !responses[question.loopQuestionsResponseKey!]
     ) {
       setRepeatCount(responses[question.id] as number);
       setRepeatQuestions(question?.questionsToRepeat);
@@ -464,6 +463,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     setResponses((prevData) => ({
       ...prevData,
       [question.id]: "",
+      [(question.loopQuestionsResponseKey as keyof typeof prevData) ?? ""]: "",
       // [question.prevQuestionId!]: "",
     }));
     if (!question?.prevQuestionId) {
@@ -512,7 +512,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
           setResponses((prevData) => {
             return {
               ...prevData,
-              [currentQuestion.id]: [
+              [currentQuestion.loopQuestionsResponseKey!]: [
                 ...repeatQuestionResponseArray,
                 repeatQuestionsResponse,
               ],
@@ -538,7 +538,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   };
 
   // console.log("responses", responses);
-console.log('currentQuestion :>> ', currentQuestion);
+  // console.log("currentQuestion :>> ", currentQuestion);
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -564,10 +564,10 @@ console.log('currentQuestion :>> ', currentQuestion);
           <CardDescription className="max-w-lg text-balance leading-relaxed">
             {currentQuestion.instructions}
           </CardDescription>
-          <div className="grid w-full items-center gap-1.5 mt-5">
-            {renderQuestion(currentQuestion, responses, setResponses)}
-          </div>
         </CardHeader>
+        <div className="grid w-full items-center gap-1.5 mt-5 p-3">
+          {renderQuestion(currentQuestion, responses, setResponses)}
+        </div>
         <CardFooter className="flex items-center justify-between mt-5">
           <Button
             type="button"
@@ -677,7 +677,11 @@ console.log('currentQuestion :>> ', currentQuestion);
               )}
           </div>
           <div className="flex items-center justify-between w-full">
-            <Button type="button" onClick={() => handlePreviousClick()}>
+            <Button
+              type="button"
+              onClick={() => handlePreviousClick()}
+              disabled={currentMultiSelectConditionalQuestionIndex === 0}
+            >
               Prev
             </Button>
             <Button type="button" onClick={() => handleNextClick()}>
@@ -686,7 +690,7 @@ console.log('currentQuestion :>> ', currentQuestion);
           </div>
         </DialogContent>
       </Dialog>
-  
+
       {currentQuestion.nextQuestionId === "submit_survey" && (
         <Button type="submit" className="mt-5" onClick={printResponse}>
           Submit
