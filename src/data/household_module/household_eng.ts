@@ -517,8 +517,8 @@ export const household_module_questions: QuestionTypeDynamic[] = [
     },
   },
   {
-    id: "subhill_others",
-    apiName: "subhillOthers",
+    id: "subhill_other",
+    apiName: "subhillOther",
     question: "Enter your subhill",
     instructions: "Please enter your subhill...",
     type: "text",

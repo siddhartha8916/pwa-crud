@@ -4,6 +4,7 @@ import { z, ZodError } from "zod";
 const apiJSONQuestions: QuestionTypeDynamic[] = [
   {
     id: 1,
+    apiName: "",
     question: "What is your age?",
     type: "number",
     validationRule: 1,
@@ -13,6 +14,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 2,
+    apiName: "",
     question: "Please select province",
     instructions: "Please select the province that apply...",
     type: "single-select",
@@ -24,6 +26,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 3,
+    apiName: "",
     question: "Please select commune",
     instructions: "Select the commune within the chosen province.",
     type: "single-select",
@@ -37,6 +40,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 4,
+    apiName: "",
     question: "Please select Hill - Coline",
     instructions: "Select the hill_coline within the chosen commune.",
     type: "single-select-others",
@@ -50,6 +54,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 5,
+    apiName: "",
     question: "Please select Subhill",
     instructions: "Select the subhill within the chosen hill_coline.",
     type: "single-select-others",
@@ -63,6 +68,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 6,
+    apiName: "",
     question: "Do you have children?",
     instructions: "Please enter Do you have children...",
     type: "single-select",
@@ -77,6 +83,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 7,
+    apiName: "",
     question: "What are the sum of their ages?",
     instructions: "Please enter sum of their ages...",
     type: "number",
@@ -86,6 +93,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 8,
+    apiName: "",
     question: "Do they like mangoes?",
     instructions: "Please select...",
     type: "single-select",
@@ -96,6 +104,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 9,
+    apiName: "",
     question: "Do you own a pet?",
     instructions: "Please enter Do you own a pet...",
     type: "single-select",
@@ -110,6 +119,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 10,
+    apiName: "",
     question: "What kind of pet(s) do you have?",
     instructions: "Please enter What kind of pet(s) do you have...",
     type: "multi-select-others",
@@ -120,6 +130,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 11,
+    apiName: "",
     question: "How old is your pet?",
     instructions: "Please enter How old is your pet...",
     type: "number",
@@ -129,6 +140,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 12,
+    apiName: "",
     question: "Enter your email address:",
     instructions: "Please enter your email address...",
     type: "text",
@@ -138,6 +150,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 13,
+    apiName: "",
     question: "Which language do you speak?",
     instructions:
       "Please select all that apply... Please enter if no values found",
@@ -149,6 +162,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 14,
+    apiName: "",
     question: "Which hobbies do you enjoy?",
     instructions: "Please select all that apply...",
     type: "multi-select",
@@ -159,6 +173,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 15,
+    apiName: "",
     question: "How many household members are there?",
     instructions: "Please enter household members number...",
     type: "number",
@@ -168,6 +183,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
     questionsToRepeat: [
       {
         id: 111,
+        apiName: "",
         question: "What is the name?",
         type: "text",
         validationRule: 1,
@@ -178,6 +194,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
       },
       {
         id: 222,
+        apiName: "",
         question: "What is the age?",
         type: "number",
         validationRule: 1,
@@ -190,6 +207,7 @@ const apiJSONQuestions: QuestionTypeDynamic[] = [
   },
   {
     id: 16,
+    apiName: "",
     question: "Which books do you read?",
     instructions: "Please select all that apply...",
     type: "multi-select",
