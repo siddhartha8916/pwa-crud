@@ -146,6 +146,8 @@ export const householdMembersQuestion = {
 export type QuestionTypeDynamic = {
   // ID of the question
   id: number | string;
+  // API key for the question
+  apiName: string;
   // Question Text
   question: string;
   // Type of the questions, like number, text, select, etc
@@ -188,6 +190,7 @@ export type QuestionTypeDynamic = {
 export type QuestionToRepeat = {
   // Instructions similar to that of QuestionTypeDynamic
   id: number | string;
+  apiName: string;
   question: string;
   type: string;
   options?: string[];
@@ -216,6 +219,7 @@ export const validationRule = {
 export const household_eng_dynamic: QuestionTypeDynamic[] = [
   {
     id: 1,
+    apiName: "",
     question: "What is your age?",
     type: "number",
     validationRule: 1,
@@ -225,6 +229,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 2,
+    apiName: "",
     question: "Please select province",
     instructions: "Please select the province that apply...",
     type: "single-select",
@@ -236,6 +241,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 3,
+    apiName: "",
     question: "Please select commune",
     instructions: "Select the commune within the chosen province.",
     type: "single-select",
@@ -249,6 +255,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 4,
+    apiName: "",
     question: "Please select Hill - Coline",
     instructions: "Select the hill_coline within the chosen commune.",
     type: "single-select-others",
@@ -262,6 +269,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 5,
+    apiName: "",
     question: "Please select Subhill",
     instructions: "Select the subhill within the chosen hill_coline.",
     type: "single-select-others",
@@ -275,6 +283,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 6,
+    apiName: "",
     question: "Do you have children?",
     instructions: "Please enter Do you have children...",
     type: "single-select",
@@ -289,6 +298,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 7,
+    apiName: "",
     question: "What are the sum of their ages?",
     instructions: "Please enter sum of their ages...",
     type: "number",
@@ -298,6 +308,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 8,
+    apiName: "",
     question: "Do they like mangoes?",
     instructions: "Please select...",
     type: "single-select",
@@ -308,6 +319,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 9,
+    apiName: "",
     question: "Do you own a pet?",
     instructions: "Please enter Do you own a pet...",
     type: "single-select",
@@ -322,6 +334,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 10,
+    apiName: "",
     question: "What kind of pet(s) do you have?",
     instructions: "Please enter What kind of pet(s) do you have...",
     type: "multi-select-others",
@@ -332,6 +345,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 11,
+    apiName: "",
     question: "How old is your pet?",
     instructions: "Please enter How old is your pet...",
     type: "number",
@@ -341,6 +355,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 12,
+    apiName: "",
     question: "Enter your email address:",
     instructions: "Please enter your email address...",
     type: "text",
@@ -350,6 +365,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 13,
+    apiName: "",
     question: "Which language do you speak?",
     instructions:
       "Please select all that apply... Please enter if no values found",
@@ -361,6 +377,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 14,
+    apiName: "",
     question: "Which hobbies do you enjoy?",
     instructions: "Please select all that apply...",
     type: "multi-select",
@@ -371,6 +388,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 15,
+    apiName: "",
     question: "How many household members are there?",
     instructions: "Please enter household members number...",
     type: "number",
@@ -380,6 +398,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
     questionsToRepeat: [
       {
         id: 111,
+        apiName: "",
         question: "What is the name?",
         type: "text",
         validationRule: 1,
@@ -390,6 +409,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
       },
       {
         id: 222,
+        apiName: "",
         question: "What is the age?",
         type: "number",
         validationRule: 1,
@@ -402,6 +422,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
   },
   {
     id: 16,
+    apiName: "",
     question: "Which books do you read?",
     instructions: "Please select all that apply...",
     type: "multi-select",
@@ -415,6 +436,7 @@ export const household_eng_dynamic: QuestionTypeDynamic[] = [
 export const household_module_questions: QuestionTypeDynamic[] = [
   {
     id: "gps",
+    apiName: "gps",
     question: "GPS location",
     type: "gps",
     validationRule: 1,
@@ -424,6 +446,7 @@ export const household_module_questions: QuestionTypeDynamic[] = [
   },
   {
     id: "province",
+    apiName: "province",
     question: "Please select province",
     instructions: "Please select the province that apply...",
     type: "single-select",
@@ -435,6 +458,7 @@ export const household_module_questions: QuestionTypeDynamic[] = [
   },
   {
     id: "commune",
+    apiName: "commune",
     question: "Please select commune",
     instructions: "Select the commune within the chosen province.",
     type: "single-select",
@@ -444,10 +468,11 @@ export const household_module_questions: QuestionTypeDynamic[] = [
     validationRule: 7,
     dependentOptionsOnQuestionId: "province",
     prevQuestionId: "province",
-    nextQuestionId: "hillColine",
+    nextQuestionId: "hill_coline",
   },
   {
-    id: "hillColine",
+    id: "hill_coline",
+    apiName: "hillColine",
     question: "Please select Hill - Coline",
     instructions: "Select the hillColine within the chosen commune.",
     type: "single-select-others",
@@ -459,12 +484,13 @@ export const household_module_questions: QuestionTypeDynamic[] = [
     prevQuestionId: "commune",
     conditions: {
       showIf: "Others",
-      nextQuestionId: "hillColineOthers",
+      nextQuestionId: "hill_coline_others",
       elseQuestionId: "subhill",
     },
   },
   {
-    id: "hillColineOthers",
+    id: "hill_coline_others",
+    apiName: "hillColineOthers",
     question: "Enter your hill",
     instructions: "Please enter your hill...",
     type: "text",
@@ -474,6 +500,7 @@ export const household_module_questions: QuestionTypeDynamic[] = [
   },
   {
     id: "subhill",
+    apiName: "subhill",
     question: "Please select Subhill",
     instructions: "Select the subhill within the chosen hillColine.",
     type: "single-select-others",
@@ -482,86 +509,94 @@ export const household_module_questions: QuestionTypeDynamic[] = [
       "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
     dependentOptionsOnQuestionId: 4,
     validationRule: 7,
-    prevQuestionId: "hillColine",
+    prevQuestionId: "hill_coline",
     conditions: {
       showIf: "Others",
-      nextQuestionId: "subhillOthers",
-      elseQuestionId: "hhMembersQuantity",
+      nextQuestionId: "subhill_others",
+      elseQuestionId: "hh_members_quantity",
     },
   },
   {
-    id: "subhillOthers",
+    id: "subhill_others",
+    apiName: "subhillOthers",
     question: "Enter your subhill",
     instructions: "Please enter your subhill...",
     type: "text",
     validationRule: 8,
     prevQuestionId: "subhill",
-    nextQuestionId: "hhMembersQuantity",
+    nextQuestionId: "hh_members_quantity",
   },
   {
-    id: "hhMembersQuantity",
+    id: "hh_members_quantity",
+    apiName: "hhMembersQuantity",
     question: "How many members make up your household ?",
     instructions: "Please enter the count of household members...",
     type: "number",
     validationRule: 1,
     prevQuestionId: "subhill",
-    nextQuestionId: "hhPermWorkers",
+    nextQuestionId: "hh_perm_workers",
     loopQuestionsResponseKey: "hhMembers",
     questionsToRepeat: [
       {
-        id: "hhName",
+        id: "hh_name",
+        apiName: "hhName",
         question: "Name of household member - ",
         type: "text",
         validationRule: 1,
         instructions: "Please enter the member name...",
-        loopHeadingQuestionId: "hhName",
+        loopHeadingQuestionId: "hh_ame",
         prevQuestionId: null,
-        nextQuestionId: "hhSurname",
+        nextQuestionId: "hh_surname",
       },
       {
-        id: "hhSurname",
+        id: "hh_surname",
+        apiName: "hhSurname",
         question: "Surname of household member?",
         type: "number",
         validationRule: 1,
         instructions: "Please enter the member age...",
-        loopHeadingQuestionId: "hhName",
-        prevQuestionId: "hhName",
+        loopHeadingQuestionId: "hh_name",
+        prevQuestionId: "hh_name",
         nextQuestionId: "sex",
       },
       {
         id: "sex",
+        apiName: "sex",
         question: "Gender of household member?",
         type: "single-select",
         options: ["Male", "Female"],
         validationRule: 1,
         instructions: "Please enter the gender for",
-        loopHeadingQuestionId: "hhName",
-        prevQuestionId: "hhSurname",
+        loopHeadingQuestionId: "hh_name",
+        prevQuestionId: "hh_surname",
         nextQuestionId: "dob",
       },
       {
         id: "dob",
+        apiName: "dob",
         question: "Date of Birth of household member?",
         type: "date",
         validationRule: 1,
         instructions: "Please enter the date of birth for",
-        loopHeadingQuestionId: "hhName",
+        loopHeadingQuestionId: "hh_name",
         prevQuestionId: "sex",
         nextQuestionId: "literacy",
       },
       {
         id: "literacy",
+        apiName: "literacy",
         question: "Can household member read and write?",
         type: "single-select",
         options: ["Yes", "No"],
         validationRule: 1,
         instructions: "Please enter the date of birth for",
-        loopHeadingQuestionId: "hhName",
+        loopHeadingQuestionId: "hh_name",
         prevQuestionId: "dob",
         nextQuestionId: "education",
       },
       {
         id: "education",
+        apiName: "education",
         question: "Household member education level",
         type: "single-select",
         options: [
@@ -577,12 +612,13 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         ],
         validationRule: 1,
         instructions: "Please enter the education level for",
-        loopHeadingQuestionId: "hhName",
+        loopHeadingQuestionId: "hh_name",
         prevQuestionId: "literacy",
-        nextQuestionId: "hhRelationship",
+        nextQuestionId: "hh_relationship",
       },
       {
-        id: "hhRelationship",
+        id: "hh_relationship",
+        apiName: "hhRelationship",
         question: "Relation of household member with HH head",
         type: "single-select-others",
         options: [
@@ -594,12 +630,13 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         validationRule: 1,
         instructions:
           "Please select the relation. If not found enter and press create",
-        loopHeadingQuestionId: "hhName",
+        loopHeadingQuestionId: "hh_name",
         prevQuestionId: "education",
-        nextQuestionId: "hhActivities",
+        nextQuestionId: "hh_activities",
       },
       {
-        id: "hhActivities",
+        id: "hh_activities",
+        apiName: "hhActivities",
         question: "What economic activities are performed by - ",
         type: "multi-select-others",
         options: [
@@ -615,61 +652,66 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         validationRule: 1,
         instructions:
           "Please select the activities performed by the member. If not found enter and press create",
-        loopHeadingQuestionId: "hhName",
-        prevQuestionId: "hhRelationship",
+        loopHeadingQuestionId: "hh_name",
+        prevQuestionId: "hh_relationship",
         nextQuestionId: null,
       },
     ],
   },
   {
-    id: "hhPermWorkers",
+    id: "hh_perm_workers",
+    apiName: "hhPermWorkers",
     question: "Does the household have permanent workers for the farm?",
     instructions:
       "Permanent hired labor refers to employees contracted for long-term or indefinite work with consistent wages and benefits",
     type: "single-select",
     options: ["Yes", "No"],
-    prevQuestionId: "hhMembersQuantity",
+    prevQuestionId: "hh_members_quantity",
     conditions: {
       showIf: "Yes",
-      nextQuestionId: "hhPermWorkersSalary",
-      elseQuestionId: "hhAssets",
+      nextQuestionId: "hh_perm_workers_salary",
+      elseQuestionId: "hh_assets",
     },
     validationRule: 7,
   },
   {
-    id: "hhPermWorkersSalary",
+    id: "hh_perm_workers_salary",
+    apiName: "hhPermWorkersSalary",
     question: "Monthly salary for one permanent worker?",
     instructions:
       "Average monthly salary paid to a permanent worker who works in any farm activity.",
     type: "text",
     validationRule: 7,
-    prevQuestionId: "hhPermWorkers",
-    nextQuestionId: "hhPermWorkersDaysWeek",
+    prevQuestionId: "hh_perm_workers",
+    nextQuestionId: "hh_perm_workers_days_week",
   },
   {
-    id: "hhPermWorkersDaysWeek",
+    id: "hh_perm_workers_days_week",
+    apiName: "hhPermWorkersDaysWeek",
     question: "Total days per week worked by one permanent worker",
     instructions:
       "Average number of days worked per week by a permanent worker on the farm for all activities.",
     type: "single-select",
     options: ["1", "2", "3", "4", "5", "6", "7"],
     validationRule: 7,
-    prevQuestionId: "hhPermWorkersSalary",
-    nextQuestionId: "hhPermWorkersHrDay",
+    prevQuestionId: "hh_perm_workers_salary",
+    nextQuestionId: "hh_perm_workers_hr_day",
   },
   {
-    id: "hhPermWorkersHrDay",
+    id: "hh_perm_workers_hr_day",
+    apiName: "hhPermWorkersHrDay",
     question: "Total hours per day worked by one permanent worker",
     instructions:
       "Average number of hours worked per day by a permanent worker on the farm for all activities.",
     type: "single-select",
     options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
     validationRule: 7,
-    prevQuestionId: "hhPermWorkersDaysWeek",
-    nextQuestionId: "hhAssets",
+    prevQuestionId: "hh_perm_workers_days_week",
+    nextQuestionId: "hh_assets",
   },
   {
-    id: "hhAssets",
+    id: "hh_assets",
+    apiName: "hhAssets",
     question: "Select items currently owned by the household",
     instructions:
       "Average number of hours worked per day by a permanent worker on the farm for all activities.",
@@ -699,11 +741,12 @@ export const household_module_questions: QuestionTypeDynamic[] = [
       "Others",
     ],
     validationRule: 7,
-    prevQuestionId: "hhPermWorkersHrDay",
+    prevQuestionId: "hh_perm_workers_hr_day",
     nextQuestionId: "submit_survey",
     conditionalQuestions: [
       {
-        id: "hhAssetsBedNum",
+        id: "hh_assets_bed_num",
+        apiName: "hhAssetsBedNum",
         choiceBaseQuestionId: "hhAssets",
         showIfMultiConditionalValue: "Bed or drying mat",
         question: "How many beds or drying mats?",
@@ -714,7 +757,8 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         nextQuestionId: null,
       },
       {
-        id: "hhAssetsBedValue",
+        id: "hh_assets_bed_value",
+        apiName: "hhAssetsBedValue",
         choiceBaseQuestionId: "hhAssets",
         showIfMultiConditionalValue: "Bed or drying mat",
         question: "Value beds or drying mats?",
@@ -725,7 +769,8 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         nextQuestionId: null,
       },
       {
-        id: "hhAssetsBicyclesNum",
+        id: "hh_assets_bicycles_num",
+        apiName: "hhAssetsBicyclesNum",
         choiceBaseQuestionId: "hhAssets",
         showIfMultiConditionalValue: "Bicycles",
         question: "How many bicycles?",
@@ -736,7 +781,8 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         nextQuestionId: null,
       },
       {
-        id: "hhAssetsBicyclesValue",
+        id: "hh_assets_bicycles_value",
+        apiName: "hhAssetsBicyclesValue",
         choiceBaseQuestionId: "hhAssets",
         showIfMultiConditionalValue: "Bicycles",
         question: "Value bicycles?",
@@ -747,7 +793,8 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         nextQuestionId: null,
       },
       {
-        id: "hhAssetsCarsNum",
+        id: "hh_assets_cars_num",
+        apiName: "hhAssetsCarsNum",
         choiceBaseQuestionId: "hhAssets",
         showIfMultiConditionalValue: "Car",
         question: "How many cars?",
@@ -758,7 +805,8 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         nextQuestionId: null,
       },
       {
-        id: "hhAssetsCarsValue",
+        id: "hh_assets_cars_value",
+        apiName: "hhAssetsCarsValue",
         choiceBaseQuestionId: "hhAssets",
         showIfMultiConditionalValue: "Car",
         question: "Value cars?",

@@ -67,7 +67,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
 
   // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
 
-  // console.log("questionOptions", questionOptions);
+
 
   const getOptions = async (
     question: QuestionTypeDynamic | QuestionToRepeat,
@@ -168,6 +168,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   };
 
   const [responses, setResponses] = useState<Response>({});
+  console.log("responses", responses);
   const [multiSelectConditionalResponses, setMultiSelectConditionalResponses] =
     useState<Response>({});
   // console.log("repeatQuestionsResponse", repeatQuestionsResponse);
@@ -187,16 +188,11 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       case "text":
         return (
           <Input
-            id={question.id.toString()}
-            value={
-              typeof responsesData[question.id] === "object" ||
-              !responsesData[question.id]
-                ? ""
-                : (responsesData[question.id] as string)
-            }
+            id={question.apiName.toString()}
+            value={responsesData[question.apiName] as string || ""}
             onChange={(event) =>
               handleInputChange(
-                question.id,
+                question.apiName,
                 event.target.value,
                 setResponseData
               )
@@ -217,12 +213,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             direction="column"
             className="col-span-2 -mt-1"
             selected={
-              responsesData[question.id]
-                ? (responsesData[question.id] as Option[])
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
                 : null
             }
             setSelected={(value) => {
-              handleInputChange(question.id, value, setResponseData);
+              handleInputChange(question.apiName, value, setResponseData);
             }}
           />
         );
@@ -241,12 +237,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             direction="column"
             className="col-span-2 -mt-1"
             selected={
-              responsesData[question.id]
-                ? (responsesData[question.id] as Option[])
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
                 : null
             }
             setSelected={(value) => {
-              handleInputChange(question.id, value, setResponseData);
+              handleInputChange(question.apiName, value, setResponseData);
             }}
           />
         );
@@ -265,12 +261,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             direction="column"
             className="col-span-2 -mt-1"
             selected={
-              responsesData[question.id]
-                ? (responsesData[question.id] as Option[])
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
                 : null
             }
             setSelected={(value) => {
-              handleInputChange(question.id, value, setResponseData);
+              handleInputChange(question.apiName, value, setResponseData);
             }}
           />
         );
@@ -289,12 +285,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             direction="column"
             className="col-span-2 -mt-1"
             selected={
-              responsesData[question.id]
-                ? (responsesData[question.id] as Option[])
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
                 : null
             }
             setSelected={(value) => {
-              handleInputChange(question.id, value, setResponseData);
+              handleInputChange(question.apiName, value, setResponseData);
             }}
           />
         );
@@ -313,12 +309,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             direction="column"
             className="col-span-2 -mt-1"
             selected={
-              responsesData[question.id]
-                ? (responsesData[question.id] as Option[])
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
                 : null
             }
             setSelected={(value) => {
-              handleInputChange(question.id, value, setResponseData);
+              handleInputChange(question.apiName, value, setResponseData);
             }}
           />
         );
@@ -326,12 +322,12 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         return (
           <>
             <Input
-              id={question.id.toString()}
-              value={(responsesData[question.id] as string) || ""}
+              id={question.apiName.toString()}
+              value={(responsesData[question.apiName] as string) || ""}
               disabled
             />
             <Button
-              onClick={() => getUserLocation(question.id, setResponseData)}
+              onClick={() => getUserLocation(question.apiName, setResponseData)}
             >
               Get Location
             </Button>
@@ -340,11 +336,11 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       case "date":
         return (
           <Input
-            id={question.id.toString()}
-            value={(responsesData[question.id] as string) || ""}
+            id={question.apiName.toString()}
+            value={(responsesData[question.apiName] as string) || ""}
             onChange={(event) =>
               handleInputChange(
-                question.id,
+                question.apiName,
                 event.target.value,
                 setResponseData
               )
@@ -394,8 +390,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       question.type === "multi-select-conditional" &&
       question?.conditionalQuestions
     ) {
-      //
-      const value = responses[question.id];
+      const value = responses[question.apiName];
       const selectedOptions = (value as Option[]).map((item) => item.value);
 
       const filteredQuestions = question.conditionalQuestions.filter((item) =>
@@ -418,7 +413,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       question.questionsToRepeat &&
       !responses[question.loopQuestionsResponseKey!]
     ) {
-      setRepeatCount(responses[question.id] as number);
+      setRepeatCount(responses[question.apiName] as number);
       setRepeatQuestions(question?.questionsToRepeat);
       setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
       setOpen(true);
@@ -431,7 +426,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     if (question.conditions) {
       if (
         question.conditions.showIf ===
-        (responses[question.id] as Option[])?.[0].value
+        (responses[question.apiName] as Option[])?.[0].value
       ) {
         const next = household_module_questions.find(
           (item) => item.id === question?.conditions?.nextQuestionId
@@ -462,7 +457,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     setQuestionOptions(undefined);
     setResponses((prevData) => ({
       ...prevData,
-      [question.id]: "",
+      [question.apiName]: "",
       [(question.loopQuestionsResponseKey as keyof typeof prevData) ?? ""]: "",
       // [question.prevQuestionId!]: "",
     }));
@@ -490,7 +485,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       if (!next && repeatQuestions?.length) {
         setRepeatCount((prevCount) => prevCount - 1);
 
-        if (repeatCount <= (responses[currentQuestion.id] as number)) {
+        if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
           setCurrentRepeatQuestion(repeatQuestions?.[0]);
           setRepeatQuestionResponseArray((prevData) => [
             ...(prevData as Response[]),
@@ -579,7 +574,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
           <Button
             type="button"
             onClick={() => handleNextQuestion(currentQuestion)}
-            disabled={!responses[currentQuestion.id]}
+            disabled={!responses[currentQuestion.apiName]}
           >
             Next
           </Button>
@@ -630,7 +625,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
               onClick={() => handleNextRepeatQuestion(currentRepeatQuestion)}
               disabled={
                 currentRepeatQuestion?.id
-                  ? !repeatQuestionsResponse[currentRepeatQuestion?.id]
+                  ? !repeatQuestionsResponse[currentRepeatQuestion?.apiName]
                   : false
               }
             >
