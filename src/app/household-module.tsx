@@ -540,6 +540,14 @@ const HouseholdModuleDynamicQuestionnaire = () => {
 
   // console.log("responses", responses);
   // console.log("currentQuestion :>> ", currentQuestion);
+  const loopHeadingQuestion = repeatQuestions?.find(
+    (item) =>
+      item.loopHeadingQuestionId ===
+      currentRepeatQuestion?.loopHeadingQuestionId
+  );
+  const loopHeadingText = repeatQuestionsResponse[
+    loopHeadingQuestion?.apiName as string
+  ] as string;
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -594,12 +602,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         >
           <DialogHeader>
             <DialogTitle>
-              {currentRepeatQuestion?.question} -{" "}
-              {
-                repeatQuestionsResponse[
-                  currentRepeatQuestion?.loopHeadingQuestionId as number
-                ] as string
-              }
+              {currentRepeatQuestion?.question} - {loopHeadingText}
             </DialogTitle>
             <DialogDescription>
               {currentRepeatQuestion?.instructions} for{" "}
