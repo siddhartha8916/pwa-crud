@@ -30,6 +30,7 @@ import { useAddHouseholdInfo } from "@/services/app-survey";
 import {
   convertToArrayOfValues,
   getCurrentPosition,
+  handleKeyDown,
   requestGeolocationPermission,
 } from "@/lib/utils";
 
@@ -66,8 +67,6 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   ] = useState(0);
 
   // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
-
-
 
   const getOptions = async (
     question: QuestionTypeDynamic | QuestionToRepeat,
@@ -189,7 +188,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         return (
           <Input
             id={question.apiName.toString()}
-            value={responsesData[question.apiName] as string || ""}
+            value={(responsesData[question.apiName] as string) || ""}
             onChange={(event) =>
               handleInputChange(
                 question.apiName,
@@ -197,6 +196,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
                 setResponseData
               )
             }
+            onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
           />
         );
       case "single-select":

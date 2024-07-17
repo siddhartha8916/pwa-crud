@@ -298,3 +298,151 @@ export function convertToArrayOfValues(obj: any): any {
   }
   return newObj;
 }
+
+export const validationRule = {
+  1: "Only Numbers without Decimal",
+  2: "Only Numbers with Decimal",
+  3: "Only Alphabets",
+  4: "Only Alphabets With Spaces",
+  5: "Only Alphabets and Numbers",
+  6: "Only Alphabets and Numbers With Spaces",
+  7: "Any Character Input",
+  8: "Email Validation",
+};
+
+export const validationFunctions: {
+  [key: number]: (event: KeyboardEvent) => boolean;
+} = {
+  1: validateOnlyNumbersWithoutDecimal,
+  2: validateOnlyNumbersWithDecimal,
+  3: validateOnlyAlphabets,
+  4: validateOnlyAlphabetsWithSpaces,
+  5: validateOnlyAlphabetsAndNumbers,
+  6: validateOnlyAlphabetsAndNumbersWithSpaces,
+  7: validateAnyCharacterInput,
+  8: validateEmail,
+  // Add more mappings as needed
+};
+
+export const handleKeyDown = (
+  event: React.KeyboardEvent<HTMLInputElement>,
+  validationRule: number
+) => {
+  const validationFunction = validationFunctions[validationRule];
+  if (validationFunction) {
+    // TODO: Fix
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (!validationFunction(event)) {
+      event.preventDefault();
+    }
+  }
+};
+
+// Rule 1: Only Numbers without Decimal
+export function validateOnlyNumbersWithoutDecimal(
+  event: KeyboardEvent
+): boolean {
+  const key = event.key;
+  // Allow digits 0-9 and navigation keys
+  return (
+    /^\d$/.test(key) ||
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
+
+// Rule 2: Only Numbers with Decimal
+export function validateOnlyNumbersWithDecimal(event: KeyboardEvent): boolean {
+  const key = event.key;
+  const value = (event.target as HTMLInputElement).value;
+
+  // Check if the key is a digit, or a decimal point and it's not already present in the value
+  if (/^\d$/.test(key) || (key === '.' && value.indexOf('.') === -1)) {
+    return true;
+  }
+
+  // Allow navigation and editing keys
+  return (
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
+
+// Rule 3: Only Alphabets
+export function validateOnlyAlphabets(event: KeyboardEvent): boolean {
+  const key = event.key;
+  // Allow alphabetic characters and navigation keys
+  return (
+    /^[a-zA-Z]$/.test(key) ||
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
+
+// Rule 4: Only Alphabets With Spaces
+export function validateOnlyAlphabetsWithSpaces(event: KeyboardEvent): boolean {
+  const key = event.key;
+  // Allow alphabetic characters, space, and navigation keys
+  return (
+    /^[a-zA-Z ]$/.test(key) ||
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
+
+// Rule 5: Only Alphabets and Numbers
+export function validateOnlyAlphabetsAndNumbers(event: KeyboardEvent): boolean {
+  const key = event.key;
+  // Allow alphanumeric characters and navigation keys
+  return (
+    /^[a-zA-Z0-9]$/.test(key) ||
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
+
+// Rule 6: Only Alphabets and Numbers With Spaces
+export function validateOnlyAlphabetsAndNumbersWithSpaces(
+  event: KeyboardEvent
+): boolean {
+  const key = event.key;
+  // Allow alphanumeric characters, space, and navigation keys
+  return (
+    /^[a-zA-Z0-9 ]$/.test(key) ||
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
+
+// Rule 7: Any Character Input
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function validateAnyCharacterInput(_event: KeyboardEvent): boolean {
+  // Allow any character and navigation keys
+  return true;
+}
+
+// Rule 8: Email Validation (Basic check for '@' symbol)
+export function validateEmail(event: KeyboardEvent): boolean {
+  const key = event.key;
+  // Basic check for email format (allow alphanumeric characters, @ symbol, dot, and navigation keys)
+  return (
+    /^[a-zA-Z0-9@.]$/.test(key) ||
+    event.key === "Backspace" ||
+    event.key === "Delete" ||
+    event.key === "ArrowLeft" ||
+    event.key === "ArrowRight"
+  );
+}
