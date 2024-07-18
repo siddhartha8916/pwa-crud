@@ -171,6 +171,22 @@ export const populateDataToCache = async () => {
     })
   );
 
+  const householdMembers = [
+    'Nishant',
+    'Simple',
+    'Kiran',
+    'Siddhartha'
+  ];
+  cache.put(
+    "https://pwa-api.brainstacktechnologies.com/api/v1/household/members",
+    new Response(JSON.stringify(householdMembers), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+  );
+
   const province_commune = province_commune_mapping;
   cache.put(
     "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",

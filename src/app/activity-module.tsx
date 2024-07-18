@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import {
+  activity_module_questions,
   household_module_questions,
   QuestionToRepeat,
   QuestionTypeDynamic,
@@ -21,7 +22,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { I_AddSurveyBody, Option } from "@/types/user";
-import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { useState } from "react";
 import { modifiedResponseData } from "@/lib/validate-response";
@@ -33,6 +33,7 @@ import {
   handleKeyDown,
   requestGeolocationPermission,
 } from "@/lib/utils";
+import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 
 let newMultiSelectQuestions: QuestionTypeDynamic[] = [];
 
@@ -42,7 +43,7 @@ type Response = {
 
 const ActivityModuleDynamicQuestionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
-    household_module_questions[0]
+    activity_module_questions[0]
   );
   const [repeatQuestions, setRepeatQuestions] = useState<QuestionToRepeat[]>();
   const { mutateAsync: addHouseholdInfo } = useAddHouseholdInfo();
@@ -68,9 +69,10 @@ const ActivityModuleDynamicQuestionnaire = () => {
 
   // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
 
-  const getOptions = async (
+  const handleOptions = async (
     question: QuestionTypeDynamic | QuestionToRepeat,
-    selectType: string
+    selectType: string,
+    responsesData: Response
   ) => {
     if (question.options && question.options.length > 0) {
       setQuestionOptions(
@@ -91,13 +93,19 @@ const ActivityModuleDynamicQuestionnaire = () => {
       if (question.optionsResult && question.dependentOptionsOnQuestionId) {
         const response = await fetch(question?.optionsResult);
         const data = await response.json();
-        const dependentQuestion = household_module_questions.find(
-          (item) => item.id === question.dependentOptionsOnQuestionId
-        );
+        console.log("data :>> ", data);
+        const dependentQuestion =
+          activity_module_questions.find(
+            (item) => item.id === question.dependentOptionsOnQuestionId
+          ) ||
+          currentQuestion.questionsToRepeat?.find(
+            (item) => item.id === question.dependentOptionsOnQuestionId
+          );
+
         let opts: Option[] = [];
         if (dependentQuestion) {
           const selectedPrevRespose = (
-            responses[dependentQuestion.apiName!] as Option[]
+            responsesData[dependentQuestion.apiName!] as Option[]
           )?.[0].value;
           opts =
             data[selectedPrevRespose]?.map((item: string) => ({
@@ -107,6 +115,9 @@ const ActivityModuleDynamicQuestionnaire = () => {
           if (["single-select-others"].includes(selectType)) {
             opts.push({ label: "Others", value: "Others" });
           }
+        }
+        if (opts.length === 0) {
+          opts.push({ label: "NA", value: "-" });
         }
         setQuestionOptions(opts);
       }
@@ -190,6 +201,21 @@ const ActivityModuleDynamicQuestionnaire = () => {
   ) => {
     switch (question.type) {
       case "number":
+        return (
+          <Input
+            id={question.apiName.toString()}
+            value={(responsesData[question.apiName] as string) || ""}
+            onChange={(event) =>
+              handleInputChange(
+                question.apiName,
+                event.target.value,
+                setResponseData
+              )
+            }
+            type="number"
+            onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
+          />
+        );
       case "text":
         return (
           <Input
@@ -202,12 +228,13 @@ const ActivityModuleDynamicQuestionnaire = () => {
                 setResponseData
               )
             }
+            type="text"
             onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
           />
         );
       case "single-select":
         if (!questionOptions) {
-          getOptions(question, "single-select");
+          handleOptions(question, "single-select", responsesData);
         }
         return (
           <AppFormReactSelect
@@ -230,7 +257,7 @@ const ActivityModuleDynamicQuestionnaire = () => {
         );
       case "single-select-others":
         if (!questionOptions) {
-          getOptions(question, "single-select-others");
+          handleOptions(question, "single-select-others", responsesData);
         }
         // console.log('questionOptio ', questionOptions);
         return (
@@ -254,11 +281,11 @@ const ActivityModuleDynamicQuestionnaire = () => {
         );
       case "multi-select":
         if (!questionOptions) {
-          getOptions(question, "multi-select");
+          handleOptions(question, "multi-select", responsesData);
         }
 
         return (
-          <AppFormReactSelect
+          <AppCreateableReactSelect
             options={questionOptions || []}
             label=""
             isOptionsLoading={false}
@@ -278,7 +305,7 @@ const ActivityModuleDynamicQuestionnaire = () => {
         );
       case "multi-select-others":
         if (!questionOptions) {
-          getOptions(question, "multi-select-others");
+          handleOptions(question, "multi-select-others", responsesData);
         }
 
         return (
@@ -302,7 +329,35 @@ const ActivityModuleDynamicQuestionnaire = () => {
         );
       case "multi-select-conditional":
         if (!questionOptions) {
-          getOptions(question, "multi-select-conditional");
+          handleOptions(question, "multi-select-conditional", responsesData);
+        }
+
+        return (
+          <AppCreateableReactSelect
+            options={questionOptions || []}
+            label=""
+            isOptionsLoading={false}
+            placeholder={question.question}
+            selectType="multi"
+            direction="column"
+            className="col-span-2 -mt-1"
+            selected={
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
+                : null
+            }
+            setSelected={(value) => {
+              handleInputChange(question.apiName, value, setResponseData);
+            }}
+          />
+        );
+      case "multi-select-conditional-loop":
+        if (!questionOptions) {
+          handleOptions(
+            question,
+            "multi-select-conditional-loop",
+            responsesData
+          );
         }
 
         return (
@@ -354,7 +409,6 @@ const ActivityModuleDynamicQuestionnaire = () => {
             type="date"
           />
         );
-
       default:
         return null;
     }
@@ -391,9 +445,10 @@ const ActivityModuleDynamicQuestionnaire = () => {
 
   const handleNextQuestion = (question: QuestionTypeDynamic) => {
     setQuestionOptions(undefined);
+    // console.log('question :>> ', question);
 
     // Handle those questions which are in the way like
-    // If user selects some multi-options only show 
+    // If user selects some multi-options only show
     // those questions next which matches those selected options
     if (
       question.type === "multi-select-conditional" &&
@@ -413,6 +468,18 @@ const ActivityModuleDynamicQuestionnaire = () => {
       return;
     }
 
+    if (
+      question.type === "multi-select-conditional-loop" &&
+      question.questionsToRepeat &&
+      !responses[question.loopQuestionsResponseKey!]
+    ) {
+      setRepeatCount(0);
+      setRepeatQuestions(question?.questionsToRepeat);
+      setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
+      setOpen(true);
+      return;
+    }
+
     // Dont do anything if next question id is null
     if (!question?.nextQuestionId && !question?.conditions?.nextQuestionId) {
       return;
@@ -422,7 +489,7 @@ const ActivityModuleDynamicQuestionnaire = () => {
       question.questionsToRepeat &&
       !responses[question.loopQuestionsResponseKey!]
     ) {
-      setRepeatCount(responses[question.apiName] as number);
+      setRepeatCount(0);
       setRepeatQuestions(question?.questionsToRepeat);
       setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
       setOpen(true);
@@ -437,14 +504,14 @@ const ActivityModuleDynamicQuestionnaire = () => {
         question.conditions.showIf ===
         (responses[question.apiName] as Option[])?.[0].value
       ) {
-        const next = household_module_questions.find(
+        const next = activity_module_questions.find(
           (item) => item.id === question?.conditions?.nextQuestionId
         );
         if (next) {
           setCurrentQuestion(next);
         }
       } else {
-        const next = household_module_questions.find(
+        const next = activity_module_questions.find(
           (item) => item.id === question?.conditions?.elseQuestionId
         );
         if (next) {
@@ -453,7 +520,7 @@ const ActivityModuleDynamicQuestionnaire = () => {
       }
       // If we donot have conditions then just set the next question id
     } else {
-      const next = household_module_questions.find(
+      const next = activity_module_questions.find(
         (item) => item.id === question?.nextQuestionId
       );
       if (next) {
@@ -473,7 +540,7 @@ const ActivityModuleDynamicQuestionnaire = () => {
     if (!question?.prevQuestionId) {
       return;
     }
-    const prev = household_module_questions.find(
+    const prev = activity_module_questions.find(
       (item) => item.id === question.prevQuestionId
     );
     if (prev) {
@@ -484,45 +551,202 @@ const ActivityModuleDynamicQuestionnaire = () => {
   const handleNextRepeatQuestion = (question?: QuestionToRepeat) => {
     setQuestionOptions(undefined);
     if (question) {
-      const next = repeatQuestions?.find(
-        (item) => item.id === question?.nextQuestionId
-      );
-      if (next) {
-        setCurrentRepeatQuestion(next);
-      }
-
-      if (!next && repeatQuestions?.length) {
-        setRepeatCount((prevCount) => prevCount - 1);
-
-        if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
-          setCurrentRepeatQuestion(repeatQuestions?.[0]);
-          setRepeatQuestionResponseArray((prevData) => [
-            ...(prevData as Response[]),
-            repeatQuestionsResponse,
-          ]);
-          setRepeatQuestionsResponse({});
-        }
-
-        if (repeatCount === 1) {
-          setCurrentRepeatQuestion(undefined);
-          setRepeatCount(0);
-          setOpen(false);
-          const next = household_module_questions?.find(
-            (item) => item.id === currentQuestion?.nextQuestionId
+      if (question.conditions) {
+        if (
+          question.conditions.showIf ===
+          (repeatQuestionsResponse[question.apiName] as Option[])?.[0].value
+        ) {
+          const next = repeatQuestions?.find(
+            (item) => item.id === question?.conditions?.nextQuestionId
           );
           if (next) {
-            setCurrentQuestion(next);
+            setCurrentRepeatQuestion(next);
           }
-          setResponses((prevData) => {
-            return {
-              ...prevData,
-              [currentQuestion.loopQuestionsResponseKey!]: [
-                ...repeatQuestionResponseArray,
+        } else {
+          const next = repeatQuestions?.find(
+            (item) => item.id === question?.conditions?.elseQuestionId
+          );
+          if (next) {
+            setCurrentRepeatQuestion(next);
+          }
+          // TODO : Duplicated Code
+          if (!next && repeatQuestions?.length) {
+            setRepeatCount((prevCount) => prevCount + 1);
+
+            if (
+              typeof responses[currentQuestion.apiName] === "string" &&
+              repeatCount < +(responses[currentQuestion.apiName] as number)
+            ) {
+              setCurrentRepeatQuestion(repeatQuestions?.[0]);
+              setRepeatQuestionResponseArray((prevData) => [
+                ...(prevData as Response[]),
                 repeatQuestionsResponse,
-              ],
-            };
-          });
-          setRepeatQuestionResponseArray([]);
+              ]);
+              setRepeatQuestionsResponse({});
+            }
+
+            if (
+              typeof responses[currentQuestion.apiName] === "object" &&
+              repeatCount <
+                (responses[currentQuestion.apiName] as Option[]).length
+            ) {
+              setCurrentRepeatQuestion(repeatQuestions?.[0]);
+              setRepeatQuestionResponseArray((prevData) => [
+                ...(prevData as Response[]),
+                {
+                  ...repeatQuestionsResponse,
+                  [currentQuestion.conditionalLoopKeyName as string]: (
+                    responses[currentQuestion.apiName] as Option[]
+                  )[repeatCount].value as string,
+                },
+              ]);
+              setRepeatQuestionsResponse({});
+            }
+
+            const isNumberValue =
+              typeof responses[currentQuestion.apiName] === "string" &&
+              repeatCount ===
+                +(responses[currentQuestion.apiName] as number) - 1;
+
+            const isObjectValue =
+              typeof responses[currentQuestion.apiName] === "object" &&
+              currentQuestion.type === "multi-select-conditional-loop" &&
+              repeatCount ===
+                (responses[currentQuestion.apiName] as Option[]).length - 1;
+
+            if (isNumberValue || isObjectValue) {
+              setCurrentRepeatQuestion(undefined);
+              setRepeatCount(0);
+              setOpen(false);
+              const next = activity_module_questions?.find(
+                (item) => item.id === currentQuestion?.nextQuestionId
+              );
+              if (next) {
+                setCurrentQuestion(next);
+              }
+              if (isNumberValue) {
+                setResponses((prevData) => {
+                  return {
+                    ...prevData,
+                    [currentQuestion.loopQuestionsResponseKey!]: [
+                      ...repeatQuestionResponseArray,
+                      repeatQuestionsResponse,
+                    ],
+                  };
+                });
+              } else {
+                setResponses((prevData) => {
+                  return {
+                    ...prevData,
+                    [currentQuestion.loopQuestionsResponseKey!]: [
+                      ...repeatQuestionResponseArray,
+                      {
+                        ...repeatQuestionsResponse,
+                        [currentQuestion.conditionalLoopKeyName as string]: (
+                          responses[currentQuestion.apiName] as Option[]
+                        )[repeatCount].value as string,
+                      },
+                    ],
+                  };
+                });
+              }
+
+              setRepeatQuestionResponseArray([]);
+            }
+          }
+        }
+        // If we donot have conditions then just set the next question id
+      } else {
+        const next = repeatQuestions?.find(
+          (item) => item.id === question?.nextQuestionId
+        );
+
+        if (next) {
+          setCurrentRepeatQuestion(next);
+        }
+        // TODO : Duplicated Code
+        if (!next && repeatQuestions?.length) {
+          setRepeatCount((prevCount) => prevCount + 1);
+
+          if (
+            typeof responses[currentQuestion.apiName] === "string" &&
+            repeatCount < +(responses[currentQuestion.apiName] as number)
+          ) {
+            setCurrentRepeatQuestion(repeatQuestions?.[0]);
+            setRepeatQuestionResponseArray((prevData) => [
+              ...(prevData as Response[]),
+              repeatQuestionsResponse,
+            ]);
+            setRepeatQuestionsResponse({});
+          }
+
+          if (
+            typeof responses[currentQuestion.apiName] === "object" &&
+            repeatCount <
+              (responses[currentQuestion.apiName] as Option[]).length
+          ) {
+            setCurrentRepeatQuestion(repeatQuestions?.[0]);
+            setRepeatQuestionResponseArray((prevData) => [
+              ...(prevData as Response[]),
+              {
+                ...repeatQuestionsResponse,
+                [currentQuestion.conditionalLoopKeyName as string]: (
+                  responses[currentQuestion.apiName] as Option[]
+                )[repeatCount].value as string,
+              },
+            ]);
+            setRepeatQuestionsResponse({});
+          }
+
+          const isNumberValue =
+            typeof responses[currentQuestion.apiName] === "string" &&
+            repeatCount === +(responses[currentQuestion.apiName] as number) - 1;
+
+          const isObjectValue =
+            typeof responses[currentQuestion.apiName] === "object" &&
+            currentQuestion.type === "multi-select-conditional-loop" &&
+            repeatCount ===
+              (responses[currentQuestion.apiName] as Option[]).length - 1;
+
+          if (isNumberValue || isObjectValue) {
+            setCurrentRepeatQuestion(undefined);
+            setRepeatCount(0);
+            setOpen(false);
+            const next = activity_module_questions?.find(
+              (item) => item.id === currentQuestion?.nextQuestionId
+            );
+            if (next) {
+              setCurrentQuestion(next);
+            }
+            if (isNumberValue) {
+              setResponses((prevData) => {
+                return {
+                  ...prevData,
+                  [currentQuestion.loopQuestionsResponseKey!]: [
+                    ...repeatQuestionResponseArray,
+                    repeatQuestionsResponse,
+                  ],
+                };
+              });
+            } else {
+              setResponses((prevData) => {
+                return {
+                  ...prevData,
+                  [currentQuestion.loopQuestionsResponseKey!]: [
+                    ...repeatQuestionResponseArray,
+                    {
+                      ...repeatQuestionsResponse,
+                      [currentQuestion.conditionalLoopKeyName as string]: (
+                        responses[currentQuestion.apiName] as Option[]
+                      )[repeatCount].value as string,
+                    },
+                  ],
+                };
+              });
+            }
+
+            setRepeatQuestionResponseArray([]);
+          }
         }
       }
     }
@@ -546,15 +770,19 @@ const ActivityModuleDynamicQuestionnaire = () => {
       item.loopHeadingQuestionId ===
       currentRepeatQuestion?.loopHeadingQuestionId
   );
-  const loopHeadingText = repeatQuestionsResponse[
-    loopHeadingQuestion?.apiName as string
-  ] as string;
-  
+
+  const loopHeadingText =
+    currentRepeatQuestion?.loopHeadingQuestionId === "-"
+      ? (responses[currentQuestion.apiName] as Option[])[repeatCount].value
+      : (repeatQuestionsResponse[
+          loopHeadingQuestion?.apiName as string
+        ] as string);
+
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Household Dynamic Questionnaire</h2>
-        {household_module_questions.findIndex(
+        <h2 className="text-lg font-medium">Activity Dynamic Questionnaire</h2>
+        {activity_module_questions.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}
         / {household_module_questions.length}

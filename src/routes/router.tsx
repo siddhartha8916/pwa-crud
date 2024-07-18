@@ -1,6 +1,6 @@
 import ActivityModuleDynamicQuestionnaire from "@/app/activity-module";
 import AddSurvey from "@/app/add-survey";
-import AddSurveyDynamic from "@/app/add-survey-dynamic";
+import DynamicQuestionnaire from "@/app/add-survey-dynamic";
 import ChangePassword from "@/app/change-password";
 import FarmModuleDynamicQuestionnaire from "@/app/farm-module";
 import HouseholdModuleDynamicQuestionnaire from "@/app/household-module";
@@ -30,7 +30,7 @@ const Router = () => {
         <Route path="survey/household" element={<HouseholdModuleDynamicQuestionnaire />} />
         <Route path="survey/activity" element={<ActivityModuleDynamicQuestionnaire />} />
         <Route path="survey/farm" element={<FarmModuleDynamicQuestionnaire />} />
-        <Route path="dynamic-survey" element={<AddSurveyDynamic />} />
+        <Route path="dynamic-survey" element={<DynamicQuestionnaire />} />
       </Route>
 
       {/* If no matching route is found, redirect to the dashboard */}

@@ -532,9 +532,12 @@ const FarmModuleDynamicQuestionnaire = () => {
           }
           // TODO : Duplicated Code
           if (!next && repeatQuestions?.length) {
-            setRepeatCount((prevCount) => prevCount - 1);
+            setRepeatCount((prevCount) => prevCount + 1);
 
-            if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
+            if (
+              typeof responses[currentQuestion.apiName] === "string" &&
+              repeatCount < +(responses[currentQuestion.apiName] as number)
+            ) {
               setCurrentRepeatQuestion(repeatQuestions?.[0]);
               setRepeatQuestionResponseArray((prevData) => [
                 ...(prevData as Response[]),
@@ -543,7 +546,36 @@ const FarmModuleDynamicQuestionnaire = () => {
               setRepeatQuestionsResponse({});
             }
 
-            if (repeatCount === 1) {
+            if (
+              typeof responses[currentQuestion.apiName] === "object" &&
+              repeatCount <
+                (responses[currentQuestion.apiName] as Option[]).length
+            ) {
+              setCurrentRepeatQuestion(repeatQuestions?.[0]);
+              setRepeatQuestionResponseArray((prevData) => [
+                ...(prevData as Response[]),
+                {
+                  ...repeatQuestionsResponse,
+                  [currentQuestion.conditionalLoopKeyName as string]: (
+                    responses[currentQuestion.apiName] as Option[]
+                  )[repeatCount].value as string,
+                },
+              ]);
+              setRepeatQuestionsResponse({});
+            }
+
+            const isNumberValue =
+              typeof responses[currentQuestion.apiName] === "string" &&
+              repeatCount ===
+                +(responses[currentQuestion.apiName] as number) - 1;
+
+            const isObjectValue =
+              typeof responses[currentQuestion.apiName] === "object" &&
+              currentQuestion.type === "multi-select-conditional-loop" &&
+              repeatCount ===
+                (responses[currentQuestion.apiName] as Option[]).length - 1;
+
+            if (isNumberValue || isObjectValue) {
               setCurrentRepeatQuestion(undefined);
               setRepeatCount(0);
               setOpen(false);
@@ -553,15 +585,33 @@ const FarmModuleDynamicQuestionnaire = () => {
               if (next) {
                 setCurrentQuestion(next);
               }
-              setResponses((prevData) => {
-                return {
-                  ...prevData,
-                  [currentQuestion.loopQuestionsResponseKey!]: [
-                    ...repeatQuestionResponseArray,
-                    repeatQuestionsResponse,
-                  ],
-                };
-              });
+              if (isNumberValue) {
+                setResponses((prevData) => {
+                  return {
+                    ...prevData,
+                    [currentQuestion.loopQuestionsResponseKey!]: [
+                      ...repeatQuestionResponseArray,
+                      repeatQuestionsResponse,
+                    ],
+                  };
+                });
+              } else {
+                setResponses((prevData) => {
+                  return {
+                    ...prevData,
+                    [currentQuestion.loopQuestionsResponseKey!]: [
+                      ...repeatQuestionResponseArray,
+                      {
+                        ...repeatQuestionsResponse,
+                        [currentQuestion.conditionalLoopKeyName as string]: (
+                          responses[currentQuestion.apiName] as Option[]
+                        )[repeatCount].value as string,
+                      },
+                    ],
+                  };
+                });
+              }
+
               setRepeatQuestionResponseArray([]);
             }
           }
@@ -571,16 +621,18 @@ const FarmModuleDynamicQuestionnaire = () => {
         const next = repeatQuestions?.find(
           (item) => item.id === question?.nextQuestionId
         );
-        // console.log("next :>> ", next);
 
         if (next) {
           setCurrentRepeatQuestion(next);
         }
         // TODO : Duplicated Code
         if (!next && repeatQuestions?.length) {
-          setRepeatCount((prevCount) => prevCount - 1);
+          setRepeatCount((prevCount) => prevCount + 1);
 
-          if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
+          if (
+            typeof responses[currentQuestion.apiName] === "string" &&
+            repeatCount < +(responses[currentQuestion.apiName] as number)
+          ) {
             setCurrentRepeatQuestion(repeatQuestions?.[0]);
             setRepeatQuestionResponseArray((prevData) => [
               ...(prevData as Response[]),
@@ -589,7 +641,35 @@ const FarmModuleDynamicQuestionnaire = () => {
             setRepeatQuestionsResponse({});
           }
 
-          if (repeatCount === 1) {
+          if (
+            typeof responses[currentQuestion.apiName] === "object" &&
+            repeatCount <
+              (responses[currentQuestion.apiName] as Option[]).length
+          ) {
+            setCurrentRepeatQuestion(repeatQuestions?.[0]);
+            setRepeatQuestionResponseArray((prevData) => [
+              ...(prevData as Response[]),
+              {
+                ...repeatQuestionsResponse,
+                [currentQuestion.conditionalLoopKeyName as string]: (
+                  responses[currentQuestion.apiName] as Option[]
+                )[repeatCount].value as string,
+              },
+            ]);
+            setRepeatQuestionsResponse({});
+          }
+
+          const isNumberValue =
+            typeof responses[currentQuestion.apiName] === "string" &&
+            repeatCount === +(responses[currentQuestion.apiName] as number) - 1;
+
+          const isObjectValue =
+            typeof responses[currentQuestion.apiName] === "object" &&
+            currentQuestion.type === "multi-select-conditional-loop" &&
+            repeatCount ===
+              (responses[currentQuestion.apiName] as Option[]).length - 1;
+
+          if (isNumberValue || isObjectValue) {
             setCurrentRepeatQuestion(undefined);
             setRepeatCount(0);
             setOpen(false);
@@ -599,15 +679,33 @@ const FarmModuleDynamicQuestionnaire = () => {
             if (next) {
               setCurrentQuestion(next);
             }
-            setResponses((prevData) => {
-              return {
-                ...prevData,
-                [currentQuestion.loopQuestionsResponseKey!]: [
-                  ...repeatQuestionResponseArray,
-                  repeatQuestionsResponse,
-                ],
-              };
-            });
+            if (isNumberValue) {
+              setResponses((prevData) => {
+                return {
+                  ...prevData,
+                  [currentQuestion.loopQuestionsResponseKey!]: [
+                    ...repeatQuestionResponseArray,
+                    repeatQuestionsResponse,
+                  ],
+                };
+              });
+            } else {
+              setResponses((prevData) => {
+                return {
+                  ...prevData,
+                  [currentQuestion.loopQuestionsResponseKey!]: [
+                    ...repeatQuestionResponseArray,
+                    {
+                      ...repeatQuestionsResponse,
+                      [currentQuestion.conditionalLoopKeyName as string]: (
+                        responses[currentQuestion.apiName] as Option[]
+                      )[repeatCount].value as string,
+                    },
+                  ],
+                };
+              });
+            }
+
             setRepeatQuestionResponseArray([]);
           }
         }

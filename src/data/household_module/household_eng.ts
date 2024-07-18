@@ -160,6 +160,7 @@ export type QuestionTypeDynamic = {
     | "text"
     | "gps"
     | "multi-select-conditional"
+    | "multi-select-conditional-loop"
     | "date";
   // Only add this is the type is select. Populate with string[].
   // If options are to be fetched from backend provide empty array
@@ -194,6 +195,17 @@ export type QuestionTypeDynamic = {
   conditionalQuestions?: QuestionTypeDynamic[];
   // Value to match for the parent Question to show what all questions
   showIfMultiConditionalValue?: string | number;
+  // use this if the question type is multi-select-conditional-loop in order to add that property to the object
+  // Example : {
+  // other properties,
+  // [conditionalLoopKeyName]  : Corresponding Option Index Value
+  // {
+  //   "noOfDays": "45",
+  //   "noOfHours": "453",
+  //   "userName": "Nishant"
+  //  }
+  // }
+  conditionalLoopKeyName?: string;
 };
 
 export type QuestionToRepeat = {
@@ -210,6 +222,7 @@ export type QuestionToRepeat = {
     | "text"
     | "gps"
     | "multi-select-conditional"
+    | "multi-select-conditional-loop"
     | "date";
   options?: string[];
   optionsResult?: string;
@@ -225,6 +238,7 @@ export type QuestionToRepeat = {
   prevQuestionId: number | string | null;
   // Loop's main question id to provide some info about which question user is filling information
   // The value for loop's main question will be populated
+  // loop heading question id to be (-) in case heading is derived from corresponding options array
   loopHeadingQuestionId: number | string;
 };
 
@@ -241,218 +255,59 @@ export const validationRule = {
 
 export const household_eng_dynamic: QuestionTypeDynamic[] = [
   {
-    id: 1,
-    apiName: "",
-    question: "What is your age?",
-    type: "number",
-    validationRule: 7,
-    instructions: "Please enter your age in numbers...",
-    nextQuestionId: 2,
-    prevQuestionId: null,
-  },
-  {
-    id: 2,
-    apiName: "",
-    question: "Please select province",
-    instructions: "Please select the province that apply...",
+    id: "activity_who_hh_select",
+    apiName: "activityWhoHhSelect",
+    question: "Did household member do the activity?",
+    instructions: "Please select if any household member did the activity",
     type: "single-select",
-    options: [],
-    optionsResult: "https://pwa-api.brainstacktechnologies.com/api/v1/province",
-    validationRule: 7,
-    prevQuestionId: 1,
-    nextQuestionId: 3,
-  },
-  {
-    id: 3,
-    apiName: "",
-    question: "Please select commune",
-    instructions: "Select the commune within the chosen province.",
-    type: "single-select",
-    options: [],
-    optionsResult:
-      "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",
-    validationRule: 7,
-    dependentOptionsOnQuestionId: 2,
-    prevQuestionId: 2,
-    nextQuestionId: 4,
-  },
-  {
-    id: 4,
-    apiName: "",
-    question: "Please select Hill - Coline",
-    instructions: "Select the hill_coline within the chosen commune.",
-    type: "single-select-others",
-    options: [],
-    optionsResult:
-      "https://pwa-api.brainstacktechnologies.com/api/v1/commune-hill",
-    dependentOptionsOnQuestionId: 3,
-    validationRule: 7,
-    prevQuestionId: 3,
-    nextQuestionId: 5,
-  },
-  {
-    id: 5,
-    apiName: "",
-    question: "Please select Subhill",
-    instructions: "Select the subhill within the chosen hill_coline.",
-    type: "single-select-others",
-    options: [],
-    optionsResult:
-      "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
-    dependentOptionsOnQuestionId: 4,
-    validationRule: 7,
-    prevQuestionId: 4,
-    nextQuestionId: 6,
-  },
-  {
-    id: 6,
-    apiName: "",
-    question: "Do you have children?",
-    instructions: "Please enter Do you have children...",
-    type: "single-select",
-    validationRule: 7,
     options: ["Yes", "No"],
-    prevQuestionId: 5,
+    validationRule: 7,
+    prevQuestionId: "activity",
     conditions: {
       showIf: "Yes",
-      nextQuestionId: 7,
-      elseQuestionId: 9,
+      nextQuestionId: "activity_who_hh_list",
+      elseQuestionId: "activity_who_others",
     },
   },
   {
-    id: 7,
-    apiName: "",
-    question: "What are the sum of their ages?",
-    instructions: "Please enter sum of their ages...",
-    type: "number",
+    id: "activity_who_hh_list",
+    apiName: "activityWhoHhList",
+    question: "Select who all household member did the activity?",
+    instructions: "Select all that apply",
+    type: "multi-select-conditional-loop",
+    options: [],
+    optionsResult:
+      "https://pwa-api.brainstacktechnologies.com/api/v1/household/members",
     validationRule: 7,
-    prevQuestionId: 6,
-    nextQuestionId: 8,
-  },
-  {
-    id: 8,
-    apiName: "",
-    question: "Do they like mangoes?",
-    instructions: "Please select...",
-    type: "single-select",
-    validationRule: 7,
-    options: ["Yes", "No"],
-    prevQuestionId: 7,
-    nextQuestionId: 9,
-  },
-  {
-    id: 9,
-    apiName: "",
-    question: "Do you own a pet?",
-    instructions: "Please enter Do you own a pet...",
-    type: "single-select",
-    options: ["Yes", "No"],
-    validationRule: 7,
-    prevQuestionId: 2,
-    conditions: {
-      showIf: "Yes",
-      nextQuestionId: 10,
-      elseQuestionId: 12,
-    },
-  },
-  {
-    id: 10,
-    apiName: "",
-    question: "What kind of pet(s) do you have?",
-    instructions: "Please enter What kind of pet(s) do you have...",
-    type: "multi-select-others",
-    options: ["Dog", "Cat", "Bird"],
-    validationRule: 4,
-    prevQuestionId: 9,
-    nextQuestionId: 11,
-  },
-  {
-    id: 11,
-    apiName: "",
-    question: "How old is your pet?",
-    instructions: "Please enter How old is your pet...",
-    type: "number",
-    validationRule: 7,
-    prevQuestionId: 10,
-    nextQuestionId: 12,
-  },
-  {
-    id: 12,
-    apiName: "",
-    question: "Enter your email address:",
-    instructions: "Please enter your email address...",
-    type: "text",
-    validationRule: 8,
-    prevQuestionId: 11,
-    nextQuestionId: 13,
-  },
-  {
-    id: 13,
-    apiName: "",
-    question: "Which language do you speak?",
-    instructions:
-      "Please select all that apply... Please enter if no values found",
-    type: "single-select-others",
-    options: ["English", "Spanish", "French", "German"],
-    validationRule: 7,
-    prevQuestionId: 12,
-    nextQuestionId: 14,
-  },
-  {
-    id: 14,
-    apiName: "",
-    question: "Which hobbies do you enjoy?",
-    instructions: "Please select all that apply...",
-    type: "multi-select",
-    options: ["Reading", "Sports", "Cooking", "Gardening", "Traveling"],
-    validationRule: 7,
-    prevQuestionId: 13,
-    nextQuestionId: 15,
-  },
-  {
-    id: 15,
-    apiName: "",
-    question: "How many household members are there?",
-    instructions: "Please enter household members number...",
-    type: "number",
-    validationRule: 7,
-    prevQuestionId: 14,
-    nextQuestionId: 16,
+    prevQuestionId: "activity_who_hh_select",
+    loopQuestionsResponseKey: "activityWhoHh",
+    conditionalLoopKeyName: "",
     questionsToRepeat: [
       {
-        id: 111,
-        apiName: "",
-        question: "What is the name?",
-        type: "text",
+        id: "labor",
+        apiName: "labor",
+        question: "HOURS worked by household member in the activity",
+        instructions:
+          "For the selected day, specify how many HOURS were worked by each houseold member WITHOUT REMUNERATION. For any of these activities, please consider the time spent for preparing for the activity, doing the actual activity, etc.",
+        type: "number",
+        loopHeadingQuestionId: "-",
         validationRule: 7,
-        instructions: "Please enter the member name...",
-        loopHeadingQuestionId: 111,
         prevQuestionId: null,
-        nextQuestionId: 222,
+        nextQuestionId: "stress",
       },
       {
-        id: 222,
-        apiName: "",
-        question: "What is the age?",
+        id: "stress",
+        apiName: "stress",
+        question: "Stress gained by HH Member",
+        instructions: "For the selected day, specify stress",
         type: "number",
+        loopHeadingQuestionId: "-",
         validationRule: 7,
-        instructions: "Please enter the member age...",
-        loopHeadingQuestionId: 111,
-        prevQuestionId: 111,
+        prevQuestionId: "labor",
         nextQuestionId: null,
       },
     ],
-  },
-  {
-    id: 16,
-    apiName: "",
-    question: "Which books do you read?",
-    instructions: "Please select all that apply...",
-    type: "multi-select",
-    options: ["Comic", "Horror", "Thriller", "Sci-Fi", "Others"],
-    validationRule: 7,
-    prevQuestionId: 15,
-    nextQuestionId: null,
+    nextQuestionId: "activity_who_others",
   },
 ];
 
@@ -1243,68 +1098,6 @@ export const household_module_questions: QuestionTypeDynamic[] = [
   },
 ];
 
-// export const activity_module_questions: QuestionTypeDynamic[] = [
-//   {
-//     id: "activity",
-//     apiName: "activity",
-//     question: "Please select activity",
-//     instructions: "Select the activity done",
-//     type: "single-select",
-//     options: [
-//       "Land preparation",
-//       "Nursery activities",
-//       "Planting",
-//       "Stumping",
-//       "Prunning",
-//       "Shade tree management",
-//       "Weeding",
-//       "Applying chemical fertilizer",
-//       "Applying organic fertilizer",
-//       "Producing organic fertilizer",
-//       "Producing organic pesticide",
-//       "Mulching",
-//       "Pesticide & fungicide application",
-//       "Pest and disease management",
-//       "Harvesting",
-//       "Transport coffee",
-//       "Drying coffee cherries",
-//       "Selling",
-//       "Hiring people to work on coffee",
-//       "Food preparation for coffee workers",
-//       "Coffee input purchase and transportation",
-//     ],
-//     validationRule: 7,
-//     prevQuestionId: null,
-//     nextQuestionId: "activity_who",
-//   },
-//   {
-//     id: "activity_who",
-//     apiName: "activityWho",
-//     question: "Who did this activity today?",
-//     instructions: "Please select all that apply...",
-//     type: "multi-select-conditional",
-//     options: [
-//       "Household member",
-//       "Permanent hired labor",
-//       "Temporary/ casual hired labor",
-//     ],
-//     validationRule: 7,
-//     prevQuestionId: "activity",
-//     nextQuestionId:"activity_who_hh"
-//   },
-//   {
-//     id: "activity_who_hh",
-//     apiName: "activityWhoHh",
-//     question: "Select all household members who did the activity",
-//     instructions: "Please select all members who did the household activity...",
-//     type: "multi-select",
-//     options: [],
-//     validationRule: 7,
-//     prevQuestionId: "activity",
-//     nextQuestionId:"activity_who_hh"
-//   },
-// ];
-
 export const farm_module_questions: QuestionTypeDynamic[] = [
   {
     id: "know_land_area",
@@ -1759,6 +1552,159 @@ export const farm_module_questions: QuestionTypeDynamic[] = [
         ],
         validationRule: 7,
         prevQuestionId: "plot_pay_value",
+        nextQuestionId: null,
+      },
+    ],
+  },
+];
+
+export const activity_module_questions: QuestionTypeDynamic[] = [
+  {
+    id: "activity_date",
+    apiName: "activityDate",
+    question: "Date of the activity?",
+    type: "date",
+    validationRule: 7,
+    instructions: "Please enter the date for activity",
+    prevQuestionId: null,
+    nextQuestionId: "activity",
+  },
+  {
+    id: "activity",
+    apiName: "activity",
+    question: "Please select activity",
+    instructions: "Select the activity done",
+    type: "single-select",
+    options: [
+      "Land preparation",
+      "Nursery activities",
+      "Planting",
+      "Stumping",
+      "Prunning",
+      "Shade tree management",
+      "Weeding",
+      "Applying chemical fertilizer",
+      "Applying organic fertilizer",
+      "Producing organic fertilizer",
+      "Producing organic pesticide",
+      "Mulching",
+      "Pesticide & fungicide application",
+      "Pest and disease management",
+      "Harvesting",
+      "Transport coffee",
+      "Drying coffee cherries",
+      "Selling",
+      "Hiring people to work on coffee",
+      "Food preparation for coffee workers",
+      "Coffee input purchase and transportation",
+    ],
+    validationRule: 7,
+    prevQuestionId: "activity_date",
+    nextQuestionId: "activity_who_hh_select",
+  },
+  {
+    id: "activity_who_hh_select",
+    apiName: "activityWhoHhSelect",
+    question: "Did household member do the activity?",
+    instructions: "Please select if any household member did the activity",
+    type: "single-select",
+    options: ["Yes", "No"],
+    validationRule: 7,
+    prevQuestionId: "activity",
+    conditions: {
+      showIf: "Yes",
+      nextQuestionId: "activity_who_hh_list",
+      elseQuestionId: "activity_who_others",
+    },
+  },
+  {
+    id: "activity_who_hh_list",
+    apiName: "activityWhoHhList",
+    question: "Select who all household member did the activity?",
+    instructions: "Select all that apply",
+    type: "multi-select-conditional-loop",
+    options: [],
+    optionsResult:
+      "https://pwa-api.brainstacktechnologies.com/api/v1/household/members",
+    validationRule: 7,
+    prevQuestionId: "activity_who_hh_select",
+    loopQuestionsResponseKey: "activityWhoHh",
+    conditionalLoopKeyName: "householdMemberName",
+    questionsToRepeat: [
+      {
+        id: "labor",
+        apiName: "labor",
+        question: "HOURS worked by household member in the activity",
+        instructions:
+          "For the selected day, specify how many HOURS were worked by each houseold member WITHOUT REMUNERATION. For any of these activities, please consider the time spent for preparing for the activity, doing the actual activity, etc.",
+        type: "number",
+        loopHeadingQuestionId: "-",
+        validationRule: 7,
+        prevQuestionId: null,
+        nextQuestionId: null,
+      },
+    ],
+    nextQuestionId: "activity_who_others",
+  },
+  {
+    id: "activity_who_others",
+    apiName: "activityWhoOthers",
+    question: "Who else did this activity today?",
+    instructions: "Please select all that apply...",
+    type: "multi-select-conditional",
+    options: ["Permanent hired labor", "Temporary/ casual hired labor"],
+    validationRule: 7,
+    prevQuestionId: "activity",
+    nextQuestionId: "submit_survey",
+    conditionalQuestions: [
+      {
+        id: "perm_work_quantity",
+        apiName: "permWorkQuantity",
+        question: "Number of permanent workers performing the activity",
+        instructions:
+          "Input information on the total number of permanent workers who performed the specific coffee related activity for the day selected.",
+        showIfMultiConditionalValue: "Permanent hired labor",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: null,
+        nextQuestionId: null,
+      },
+      {
+        id: "perm_work_total_time_coffee",
+        apiName: "permWorkTotalTimeCoffee",
+        question:
+          "Total hours spent by ALL permanent workers in coffee activity",
+        instructions:
+          "Input information on the TOTAL hours spent by ALL permanent workers who performed the specific coffee related activity for the day selected. So, for example, if two permanent workers performed the pruning activity today for two hours each, you would input a total of 4 hours spent today by all permanent workers on pruning.",
+        showIfMultiConditionalValue: "Permanent hired labor",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: null,
+        nextQuestionId: null,
+      },
+      {
+        id: "temp_work_number_coffee",
+        apiName: "tempWorkNumberCoffee",
+        question:
+          "Total number of temporary workers performing coffee activity",
+        instructions:
+          "Input information on the total number of paid temporary/ casual workers who performed the specific coffee related activity for the day selected.",
+        showIfMultiConditionalValue: "Temporary/ casual hired labor",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: null,
+        nextQuestionId: null,
+      },
+      {
+        id: "total_paid_temp_workers_coffee",
+        apiName: "totalPaidTempWorkersCoffee",
+        question: "Total paid to ALL temporary workers for coffee activity",
+        instructions:
+          "Input information on the total amount paid to ALL temporary/ casual workers who performed the specific coffee related activity for the day selected.",
+        showIfMultiConditionalValue: "Temporary/ casual hired labor",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: null,
         nextQuestionId: null,
       },
     ],
