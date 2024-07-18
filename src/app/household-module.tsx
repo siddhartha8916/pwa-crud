@@ -722,7 +722,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Farm Dynamic Questionnaire</h2>
+        <h2 className="text-lg font-medium">Household Dynamic Questionnaire</h2>
         {household_module_questions.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}

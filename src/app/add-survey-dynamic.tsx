@@ -783,7 +783,7 @@ const ActivityModuleDynamicQuestionnaire = () => {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Activity Dynamic Questionnaire</h2>
+        <h2 className="text-lg font-medium">Dynamic Survey Questionnaire</h2>
         {household_eng_dynamic.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}
