@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import {
+  farm_module_questions,
   household_module_questions,
-  // household_module_questions,
   QuestionToRepeat,
   QuestionTypeDynamic,
 } from "@/data/household_module/household_eng";
@@ -41,9 +41,9 @@ type Response = {
   [key: number | string]: string | number | Option[] | Response[];
 };
 
-const HouseholdModuleDynamicQuestionnaire = () => {
+const FarmModuleDynamicQuestionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
-    household_module_questions[0]
+    farm_module_questions[0]
   );
   const [repeatQuestions, setRepeatQuestions] = useState<QuestionToRepeat[]>();
   const { mutateAsync: addHouseholdInfo } = useAddHouseholdInfo();
@@ -95,7 +95,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         const data = await response.json();
         console.log("data :>> ", data);
         const dependentQuestion =
-          household_module_questions.find(
+          farm_module_questions.find(
             (item) => item.id === question.dependentOptionsOnQuestionId
           ) ||
           currentQuestion.questionsToRepeat?.find(
@@ -201,6 +201,21 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   ) => {
     switch (question.type) {
       case "number":
+        return (
+          <Input
+            id={question.apiName.toString()}
+            value={(responsesData[question.apiName] as string) || ""}
+            onChange={(event) =>
+              handleInputChange(
+                question.apiName,
+                event.target.value,
+                setResponseData
+              )
+            }
+            type="number"
+            onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
+          />
+        );
       case "text":
         return (
           <Input
@@ -213,6 +228,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
                 setResponseData
               )
             }
+            type="text"
             onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
           />
         );
@@ -449,14 +465,14 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         question.conditions.showIf ===
         (responses[question.apiName] as Option[])?.[0].value
       ) {
-        const next = household_module_questions.find(
+        const next = farm_module_questions.find(
           (item) => item.id === question?.conditions?.nextQuestionId
         );
         if (next) {
           setCurrentQuestion(next);
         }
       } else {
-        const next = household_module_questions.find(
+        const next = farm_module_questions.find(
           (item) => item.id === question?.conditions?.elseQuestionId
         );
         if (next) {
@@ -465,7 +481,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       }
       // If we donot have conditions then just set the next question id
     } else {
-      const next = household_module_questions.find(
+      const next = farm_module_questions.find(
         (item) => item.id === question?.nextQuestionId
       );
       if (next) {
@@ -485,7 +501,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     if (!question?.prevQuestionId) {
       return;
     }
-    const prev = household_module_questions.find(
+    const prev = farm_module_questions.find(
       (item) => item.id === question.prevQuestionId
     );
     if (prev) {
@@ -531,7 +547,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
               setCurrentRepeatQuestion(undefined);
               setRepeatCount(0);
               setOpen(false);
-              const next = household_module_questions?.find(
+              const next = farm_module_questions?.find(
                 (item) => item.id === currentQuestion?.nextQuestionId
               );
               if (next) {
@@ -577,7 +593,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             setCurrentRepeatQuestion(undefined);
             setRepeatCount(0);
             setOpen(false);
-            const next = household_module_questions?.find(
+            const next = farm_module_questions?.find(
               (item) => item.id === currentQuestion?.nextQuestionId
             );
             if (next) {
@@ -625,7 +641,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
     <div>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">Farm Dynamic Questionnaire</h2>
-        {household_module_questions.findIndex(
+        {farm_module_questions.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}
         / {household_module_questions.length}
@@ -777,4 +793,4 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   );
 };
 
-export default HouseholdModuleDynamicQuestionnaire;
+export default FarmModuleDynamicQuestionnaire;

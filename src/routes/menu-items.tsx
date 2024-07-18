@@ -47,4 +47,14 @@ export const MenuItems: NavLinkProps[] = [
     icon: <></>,
     link: "/survey/household",
   },
+  {
+    title: "Activity",
+    icon: <></>,
+    link: "/survey/activity",
+  },
+  {
+    title: "Farm",
+    icon: <></>,
+    link: "/survey/farm",
+  },
 ];

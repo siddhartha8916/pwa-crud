@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import {
   household_module_questions,
-  // household_module_questions,
   QuestionToRepeat,
   QuestionTypeDynamic,
 } from "@/data/household_module/household_eng";
@@ -41,7 +40,7 @@ type Response = {
   [key: number | string]: string | number | Option[] | Response[];
 };
 
-const HouseholdModuleDynamicQuestionnaire = () => {
+const ActivityModuleDynamicQuestionnaire = () => {
   const [currentQuestion, setCurrentQuestion] = useState(
     household_module_questions[0]
   );
@@ -69,10 +68,9 @@ const HouseholdModuleDynamicQuestionnaire = () => {
 
   // console.log('repeatQuestionResponseArray', repeatQuestionResponseArray)
 
-  const handleOptions = async (
+  const getOptions = async (
     question: QuestionTypeDynamic | QuestionToRepeat,
-    selectType: string,
-    responsesData: Response
+    selectType: string
   ) => {
     if (question.options && question.options.length > 0) {
       setQuestionOptions(
@@ -93,19 +91,13 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       if (question.optionsResult && question.dependentOptionsOnQuestionId) {
         const response = await fetch(question?.optionsResult);
         const data = await response.json();
-        console.log("data :>> ", data);
-        const dependentQuestion =
-          household_module_questions.find(
-            (item) => item.id === question.dependentOptionsOnQuestionId
-          ) ||
-          currentQuestion.questionsToRepeat?.find(
-            (item) => item.id === question.dependentOptionsOnQuestionId
-          );
-
+        const dependentQuestion = household_module_questions.find(
+          (item) => item.id === question.dependentOptionsOnQuestionId
+        );
         let opts: Option[] = [];
         if (dependentQuestion) {
           const selectedPrevRespose = (
-            responsesData[dependentQuestion.apiName!] as Option[]
+            responses[dependentQuestion.apiName!] as Option[]
           )?.[0].value;
           opts =
             data[selectedPrevRespose]?.map((item: string) => ({
@@ -115,9 +107,6 @@ const HouseholdModuleDynamicQuestionnaire = () => {
           if (["single-select-others"].includes(selectType)) {
             opts.push({ label: "Others", value: "Others" });
           }
-        }
-        if (opts.length === 0) {
-          opts.push({ label: "NA", value: "-" });
         }
         setQuestionOptions(opts);
       }
@@ -218,7 +207,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "single-select":
         if (!questionOptions) {
-          handleOptions(question, "single-select", responsesData);
+          getOptions(question, "single-select");
         }
         return (
           <AppFormReactSelect
@@ -241,7 +230,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "single-select-others":
         if (!questionOptions) {
-          handleOptions(question, "single-select-others", responsesData);
+          getOptions(question, "single-select-others");
         }
         // console.log('questionOptio ', questionOptions);
         return (
@@ -265,7 +254,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "multi-select":
         if (!questionOptions) {
-          handleOptions(question, "multi-select", responsesData);
+          getOptions(question, "multi-select");
         }
 
         return (
@@ -289,7 +278,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "multi-select-others":
         if (!questionOptions) {
-          handleOptions(question, "multi-select-others", responsesData);
+          getOptions(question, "multi-select-others");
         }
 
         return (
@@ -313,7 +302,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         );
       case "multi-select-conditional":
         if (!questionOptions) {
-          handleOptions(question, "multi-select-conditional", responsesData);
+          getOptions(question, "multi-select-conditional");
         }
 
         return (
@@ -365,6 +354,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
             type="date"
           />
         );
+
       default:
         return null;
     }
@@ -401,10 +391,9 @@ const HouseholdModuleDynamicQuestionnaire = () => {
 
   const handleNextQuestion = (question: QuestionTypeDynamic) => {
     setQuestionOptions(undefined);
-    // console.log('question :>> ', question);
 
     // Handle those questions which are in the way like
-    // If user selects some multi-options only show
+    // If user selects some multi-options only show 
     // those questions next which matches those selected options
     if (
       question.type === "multi-select-conditional" &&
@@ -433,7 +422,6 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       question.questionsToRepeat &&
       !responses[question.loopQuestionsResponseKey!]
     ) {
-      console.log("running :>> ", question);
       setRepeatCount(responses[question.apiName] as number);
       setRepeatQuestions(question?.questionsToRepeat);
       setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
@@ -496,104 +484,45 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   const handleNextRepeatQuestion = (question?: QuestionToRepeat) => {
     setQuestionOptions(undefined);
     if (question) {
-      if (question.conditions) {
-        if (
-          question.conditions.showIf ===
-          (repeatQuestionsResponse[question.apiName] as Option[])?.[0].value
-        ) {
-          const next = repeatQuestions?.find(
-            (item) => item.id === question?.conditions?.nextQuestionId
-          );
-          if (next) {
-            setCurrentRepeatQuestion(next);
-          }
-        } else {
-          const next = repeatQuestions?.find(
-            (item) => item.id === question?.conditions?.elseQuestionId
-          );
-          if (next) {
-            setCurrentRepeatQuestion(next);
-          }
-          // TODO : Duplicated Code
-          if (!next && repeatQuestions?.length) {
-            setRepeatCount((prevCount) => prevCount - 1);
+      const next = repeatQuestions?.find(
+        (item) => item.id === question?.nextQuestionId
+      );
+      if (next) {
+        setCurrentRepeatQuestion(next);
+      }
 
-            if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
-              setCurrentRepeatQuestion(repeatQuestions?.[0]);
-              setRepeatQuestionResponseArray((prevData) => [
-                ...(prevData as Response[]),
+      if (!next && repeatQuestions?.length) {
+        setRepeatCount((prevCount) => prevCount - 1);
+
+        if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
+          setCurrentRepeatQuestion(repeatQuestions?.[0]);
+          setRepeatQuestionResponseArray((prevData) => [
+            ...(prevData as Response[]),
+            repeatQuestionsResponse,
+          ]);
+          setRepeatQuestionsResponse({});
+        }
+
+        if (repeatCount === 1) {
+          setCurrentRepeatQuestion(undefined);
+          setRepeatCount(0);
+          setOpen(false);
+          const next = household_module_questions?.find(
+            (item) => item.id === currentQuestion?.nextQuestionId
+          );
+          if (next) {
+            setCurrentQuestion(next);
+          }
+          setResponses((prevData) => {
+            return {
+              ...prevData,
+              [currentQuestion.loopQuestionsResponseKey!]: [
+                ...repeatQuestionResponseArray,
                 repeatQuestionsResponse,
-              ]);
-              setRepeatQuestionsResponse({});
-            }
-
-            if (repeatCount === 1) {
-              setCurrentRepeatQuestion(undefined);
-              setRepeatCount(0);
-              setOpen(false);
-              const next = household_module_questions?.find(
-                (item) => item.id === currentQuestion?.nextQuestionId
-              );
-              if (next) {
-                setCurrentQuestion(next);
-              }
-              setResponses((prevData) => {
-                return {
-                  ...prevData,
-                  [currentQuestion.loopQuestionsResponseKey!]: [
-                    ...repeatQuestionResponseArray,
-                    repeatQuestionsResponse,
-                  ],
-                };
-              });
-              setRepeatQuestionResponseArray([]);
-            }
-          }
-        }
-        // If we donot have conditions then just set the next question id
-      } else {
-        const next = repeatQuestions?.find(
-          (item) => item.id === question?.nextQuestionId
-        );
-        // console.log("next :>> ", next);
-
-        if (next) {
-          setCurrentRepeatQuestion(next);
-        }
-        // TODO : Duplicated Code
-        if (!next && repeatQuestions?.length) {
-          setRepeatCount((prevCount) => prevCount - 1);
-
-          if (repeatCount <= (responses[currentQuestion.apiName] as number)) {
-            setCurrentRepeatQuestion(repeatQuestions?.[0]);
-            setRepeatQuestionResponseArray((prevData) => [
-              ...(prevData as Response[]),
-              repeatQuestionsResponse,
-            ]);
-            setRepeatQuestionsResponse({});
-          }
-
-          if (repeatCount === 1) {
-            setCurrentRepeatQuestion(undefined);
-            setRepeatCount(0);
-            setOpen(false);
-            const next = household_module_questions?.find(
-              (item) => item.id === currentQuestion?.nextQuestionId
-            );
-            if (next) {
-              setCurrentQuestion(next);
-            }
-            setResponses((prevData) => {
-              return {
-                ...prevData,
-                [currentQuestion.loopQuestionsResponseKey!]: [
-                  ...repeatQuestionResponseArray,
-                  repeatQuestionsResponse,
-                ],
-              };
-            });
-            setRepeatQuestionResponseArray([]);
-          }
+              ],
+            };
+          });
+          setRepeatQuestionResponseArray([]);
         }
       }
     }
@@ -620,11 +549,11 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   const loopHeadingText = repeatQuestionsResponse[
     loopHeadingQuestion?.apiName as string
   ] as string;
-
+  
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Farm Dynamic Questionnaire</h2>
+        <h2 className="text-lg font-medium">Household Dynamic Questionnaire</h2>
         {household_module_questions.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}
@@ -777,4 +706,4 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   );
 };
 
-export default HouseholdModuleDynamicQuestionnaire;
+export default ActivityModuleDynamicQuestionnaire;

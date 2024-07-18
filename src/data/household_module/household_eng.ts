@@ -151,7 +151,16 @@ export type QuestionTypeDynamic = {
   // Question Text
   question: string;
   // Type of the questions, like number, text, select, etc
-  type: string;
+  type:
+    | "single-select"
+    | "multi-select"
+    | "single-select-others"
+    | "multi-select-others"
+    | "number"
+    | "text"
+    | "gps"
+    | "multi-select-conditional"
+    | "date";
   // Only add this is the type is select. Populate with string[].
   // If options are to be fetched from backend provide empty array
   // Add the api URL value to optionsResult string property next to fetch data as string[]
@@ -173,9 +182,9 @@ export type QuestionTypeDynamic = {
     // Value to match the condition
     showIf: string;
     // Next question if value matches
-    nextQuestionId: number | string;
+    nextQuestionId: number | string | null;
     // Else question if value not matches
-    elseQuestionId: number | string;
+    elseQuestionId: number | string | null;
   };
   // Enable Some question to be used as loop
   loopQuestionsResponseKey?: number | string;
@@ -192,10 +201,24 @@ export type QuestionToRepeat = {
   id: number | string;
   apiName: string;
   question: string;
-  type: string;
+  type:
+    | "single-select"
+    | "multi-select"
+    | "single-select-others"
+    | "multi-select-others"
+    | "number"
+    | "text"
+    | "gps"
+    | "multi-select-conditional"
+    | "date";
   options?: string[];
   optionsResult?: string;
   dependentOptionsOnQuestionId?: number | string;
+  conditions?: {
+    showIf: string;
+    nextQuestionId: string | number | null;
+    elseQuestionId: string | number | null;
+  };
   validationRule: number;
   instructions: string;
   nextQuestionId?: number | string | null;
@@ -507,7 +530,7 @@ export const household_module_questions: QuestionTypeDynamic[] = [
     options: [],
     optionsResult:
       "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
-    dependentOptionsOnQuestionId: 'hill_coline',
+    dependentOptionsOnQuestionId: "hill_coline",
     validationRule: 7,
     prevQuestionId: "hill_coline",
     conditions: {
@@ -1214,6 +1237,528 @@ export const household_module_questions: QuestionTypeDynamic[] = [
         validationRule: 7,
         instructions: "Please enter the value of Other",
         prevQuestionId: null,
+        nextQuestionId: null,
+      },
+    ],
+  },
+];
+
+// export const activity_module_questions: QuestionTypeDynamic[] = [
+//   {
+//     id: "activity",
+//     apiName: "activity",
+//     question: "Please select activity",
+//     instructions: "Select the activity done",
+//     type: "single-select",
+//     options: [
+//       "Land preparation",
+//       "Nursery activities",
+//       "Planting",
+//       "Stumping",
+//       "Prunning",
+//       "Shade tree management",
+//       "Weeding",
+//       "Applying chemical fertilizer",
+//       "Applying organic fertilizer",
+//       "Producing organic fertilizer",
+//       "Producing organic pesticide",
+//       "Mulching",
+//       "Pesticide & fungicide application",
+//       "Pest and disease management",
+//       "Harvesting",
+//       "Transport coffee",
+//       "Drying coffee cherries",
+//       "Selling",
+//       "Hiring people to work on coffee",
+//       "Food preparation for coffee workers",
+//       "Coffee input purchase and transportation",
+//     ],
+//     validationRule: 7,
+//     prevQuestionId: null,
+//     nextQuestionId: "activity_who",
+//   },
+//   {
+//     id: "activity_who",
+//     apiName: "activityWho",
+//     question: "Who did this activity today?",
+//     instructions: "Please select all that apply...",
+//     type: "multi-select-conditional",
+//     options: [
+//       "Household member",
+//       "Permanent hired labor",
+//       "Temporary/ casual hired labor",
+//     ],
+//     validationRule: 7,
+//     prevQuestionId: "activity",
+//     nextQuestionId:"activity_who_hh"
+//   },
+//   {
+//     id: "activity_who_hh",
+//     apiName: "activityWhoHh",
+//     question: "Select all household members who did the activity",
+//     instructions: "Please select all members who did the household activity...",
+//     type: "multi-select",
+//     options: [],
+//     validationRule: 7,
+//     prevQuestionId: "activity",
+//     nextQuestionId:"activity_who_hh"
+//   },
+// ];
+
+export const farm_module_questions: QuestionTypeDynamic[] = [
+  {
+    id: "know_land_area",
+    apiName: "isLandAreaKnown",
+    question: "Do you know the total farm area in your possession?",
+    instructions: "Please select",
+    type: "single-select",
+    options: ["Yes", "No"],
+    validationRule: 7,
+    prevQuestionId: null,
+    conditions: {
+      showIf: "Yes",
+      nextQuestionId: "total_area",
+      elseQuestionId: "crops_cultivated",
+    },
+  },
+  {
+    id: "total_area",
+    apiName: "totalArea",
+    question: "Total land area in possession",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "know_land_area",
+    nextQuestionId: "crops_cultivated",
+  },
+  {
+    id: "crops_cultivated",
+    apiName: "cropsCultivated",
+    question: "Other crops cultivated",
+    instructions:
+      "Other crops cultivated other than coffee, including natural or cultivated pastures for animal feed.",
+    type: "multi-select-others",
+    options: [
+      "Banana",
+      "Tea",
+      "Beans",
+      "Corn (maize)",
+      "Cassava (manioc)",
+      "Potato",
+      "Sweet Potato",
+      "Rice",
+      "Pasture",
+      "None",
+    ],
+    prevQuestionId: "total_area",
+    validationRule: 7,
+    conditions: {
+      showIf: "Others",
+      nextQuestionId: "crops_cultivated_other",
+      elseQuestionId: "livestock_raise",
+    },
+  },
+  {
+    id: "crops_cultivated_other",
+    apiName: "cropsCultivatedOther",
+    question: "Other, specify",
+    instructions: "Please enter",
+    type: "text",
+    validationRule: 7,
+    prevQuestionId: "crops_cultivated",
+    nextQuestionId: "livestock_raise",
+  },
+  {
+    id: "livestock_raise",
+    apiName: "livestockRaise",
+    question: "Do you raise livestock?",
+    instructions: "Please select",
+    type: "single-select",
+    options: ["Yes", "No"],
+    validationRule: 7,
+    prevQuestionId: "crops_cultivated",
+    conditions: {
+      showIf: "Yes",
+      nextQuestionId: "livestock_goats",
+      elseQuestionId: "plot_quantity",
+    },
+  },
+  {
+    id: "livestock_goats",
+    apiName: "livestockGoats",
+    question: "Number of Goats raised?",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_raise",
+    nextQuestionId: "livestock_poultry",
+  },
+  {
+    id: "livestock_poultry",
+    apiName: "livestockPoultry",
+    question: "Number of Poultry raised?",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_goats",
+    nextQuestionId: "livestock_cattle",
+  },
+  {
+    id: "livestock_cattle",
+    apiName: "livestockCattle",
+    question: "Number of Cattle raised?",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_poultry",
+    nextQuestionId: "livestock_pigs",
+  },
+  {
+    id: "livestock_pigs",
+    apiName: "livestockPigs",
+    question: "Number of Pigs raised?",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_cattle",
+    nextQuestionId: "livestock_rabbits",
+  },
+  {
+    id: "livestock_rabbits",
+    apiName: "livestockRabbits",
+    question: "Number of Rabbits raised?",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_pigs",
+    nextQuestionId: "livestock_other",
+  },
+  {
+    id: "livestock_other",
+    apiName: "livestockOther",
+    question: "Number of Other Livestock raised?",
+    instructions: "Please enter",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_rabbits",
+    nextQuestionId: "plot_quantity",
+  },
+  {
+    id: "plot_quantity",
+    apiName: "plotQuantity",
+    question: "Total number of coffee plots?",
+    instructions: "Please enter the count of coffee plots",
+    type: "number",
+    validationRule: 7,
+    prevQuestionId: "livestock_raise",
+    nextQuestionId: "submit_survey",
+    loopQuestionsResponseKey: "coffeePlotInfos",
+    questionsToRepeat: [
+      {
+        id: "plot",
+        apiName: "name",
+        question: "Name of the Coffee plot",
+        type: "text",
+        validationRule: 7,
+        instructions: "Please enter the name...",
+        loopHeadingQuestionId: "plot",
+        prevQuestionId: null,
+        nextQuestionId: "gps",
+      },
+      {
+        id: "gps",
+        apiName: "gps",
+        question: "GPS Location of the plot?",
+        type: "gps",
+        validationRule: 7,
+        instructions: "Please select location...",
+        loopHeadingQuestionId: "plot",
+        prevQuestionId: "plot",
+        nextQuestionId: "province",
+      },
+      {
+        id: "province",
+        apiName: "province",
+        question: "Please select province",
+        instructions: "Please select the province that apply...",
+        type: "single-select",
+        options: [],
+        loopHeadingQuestionId: "plot",
+        optionsResult:
+          "https://pwa-api.brainstacktechnologies.com/api/v1/province",
+        validationRule: 7,
+        prevQuestionId: "gps",
+        nextQuestionId: "commune",
+      },
+      {
+        id: "commune",
+        apiName: "commune",
+        question: "Please select commune",
+        instructions: "Select the commune within the chosen province.",
+        type: "single-select",
+        options: [],
+        loopHeadingQuestionId: "plot",
+        optionsResult:
+          "https://pwa-api.brainstacktechnologies.com/api/v1/province-commune",
+        validationRule: 7,
+        dependentOptionsOnQuestionId: "province",
+        prevQuestionId: "province",
+        nextQuestionId: "hill_coline",
+      },
+      {
+        id: "hill_coline",
+        apiName: "hillColine",
+        question: "Please select Hill - Coline",
+        instructions: "Select the hillColine within the chosen commune.",
+        type: "single-select-others",
+        loopHeadingQuestionId: "plot",
+        options: [],
+        optionsResult:
+          "https://pwa-api.brainstacktechnologies.com/api/v1/commune-hill",
+        dependentOptionsOnQuestionId: "commune",
+        validationRule: 7,
+        prevQuestionId: "commune",
+        conditions: {
+          showIf: "Others",
+          nextQuestionId: "hill_coline_other",
+          elseQuestionId: "subhill",
+        },
+      },
+      {
+        id: "hill_coline_other",
+        apiName: "hillColineOther",
+        question: "Enter your hill",
+        instructions: "Please enter your hill...",
+        loopHeadingQuestionId: "plot",
+        type: "text",
+        validationRule: 7,
+        prevQuestionId: "commune",
+        nextQuestionId: "subhill",
+      },
+      {
+        id: "subhill",
+        apiName: "subhill",
+        question: "Please select Subhill",
+        instructions: "Select the subhill within the chosen hillColine.",
+        type: "single-select-others",
+        loopHeadingQuestionId: "plot",
+        options: [],
+        optionsResult:
+          "https://pwa-api.brainstacktechnologies.com/api/v1/hill-subhill",
+        dependentOptionsOnQuestionId: "hill_coline",
+        validationRule: 7,
+        prevQuestionId: "hill_coline",
+        conditions: {
+          showIf: "Others",
+          nextQuestionId: "subhill_other",
+          elseQuestionId: "plot_area",
+        },
+      },
+      {
+        id: "subhill_other",
+        apiName: "subhillOther",
+        question: "Enter your subhill",
+        loopHeadingQuestionId: "plot",
+        instructions: "Please enter your subhill...",
+        type: "text",
+        validationRule: 7,
+        prevQuestionId: "subhill",
+        nextQuestionId: "plot_area",
+      },
+      {
+        id: "plot_area",
+        apiName: "plotArea",
+        question: "Do you know the total area of plot x?",
+        type: "single-select",
+        options: ["Yes", "No"],
+        loopHeadingQuestionId: "plot",
+        instructions: "Please enter your total area...",
+        validationRule: 7,
+        prevQuestionId: "subhill",
+        conditions: {
+          showIf: "Yes",
+          nextQuestionId: "plot_area_unit_total",
+          elseQuestionId: "coffee_trees_total",
+        },
+      },
+      {
+        id: "plot_area_unit_total",
+        question: "Indicate total Area unit of plot",
+        instructions: "Please enter value...",
+        apiName: "plotAreaUnitTotal",
+        loopHeadingQuestionId: "plot",
+        options: ["Hectares", "Square Meters", "Ares", "Ikido"],
+        type: "single-select",
+        validationRule: 7,
+        prevQuestionId: "plot_area",
+        nextQuestionId: "plot_area_unit_coffee",
+      },
+      {
+        id: "plot_area_unit_coffee",
+        apiName: "plotAreaUnitCoffee",
+        question: "Area Unit plot is cultivated with coffee",
+        instructions: "Please select value...",
+        loopHeadingQuestionId: "plot",
+        options: ["Hectares", "Square Meters", "Ares", "Ikido"],
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "plot_area_unit_total",
+        nextQuestionId: "coffee_trees_total",
+      },
+      {
+        id: "coffee_trees_total",
+        apiName: "coffeeTreesTotal",
+        question: "Total number of coffee trees",
+        instructions: "Please enter value...",
+        loopHeadingQuestionId: "plot",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "plot_area",
+        nextQuestionId: "number_coffee_age_2yrs",
+      },
+      {
+        id: "number_coffee_age_2yrs",
+        apiName: "numberCoffeeAge_2yrs",
+        question: "Number of trees (younger than 2 yrs)",
+        instructions: "Please enter value...",
+        loopHeadingQuestionId: "plot",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "coffee_trees_total",
+        nextQuestionId: "number_coffee_age_5-10yrs",
+      },
+      {
+        id: "number_coffee_age_5-10yrs",
+        apiName: "numberCoffeeAge_5_10yrs",
+        question: "Number of trees (5-10 yrs)",
+        instructions: "Please enter value...",
+        loopHeadingQuestionId: "plot",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "number_coffee_age_2yrs",
+        nextQuestionId: "number_coffee_age_16-29yrs",
+      },
+      {
+        id: "number_coffee_age_16-29yrs",
+        apiName: "numberCoffeeAge_16_29yrs",
+        question: "Number of trees (16-29 yrs)",
+        instructions: "Please enter value...",
+        loopHeadingQuestionId: "plot",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "number_coffee_age_5-10yrs",
+        nextQuestionId: "number_coffee_age_30+yrs",
+      },
+      {
+        id: "number_coffee_age_30+yrs",
+        apiName: "numberCoffeeAge_30_plus_yrs",
+        question: "Number of trees (older than 30 yrs)",
+        instructions: "Please enter value...",
+        loopHeadingQuestionId: "plot",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "number_coffee_age_16-29yrs",
+        nextQuestionId: "space_coffee_trees",
+      },
+      {
+        id: "space_coffee_trees",
+        apiName: "spaceCoffeeTrees",
+        question: "Distance between coffee trees",
+        instructions: "Please enter value...",
+        loopHeadingQuestionId: "plot",
+        type: "single-select",
+        options: ["2 by 2 meters", "2 by 1.5 meters", "Others"],
+        validationRule: 7,
+        prevQuestionId: "number_coffee_age_30+yrs",
+        conditions: {
+          showIf: "Others",
+          nextQuestionId: "space_coffee_trees_other",
+          elseQuestionId: "space_coffee_lines",
+        },
+      },
+      {
+        id: "space_coffee_trees_other",
+        apiName: "spaceCoffeeTreesOther",
+        question: "Other's specify",
+        loopHeadingQuestionId: "plot",
+        instructions: "Please enter value...",
+        type: "text",
+        validationRule: 7,
+        prevQuestionId: "space_coffee_trees",
+        nextQuestionId: "space_coffee_lines",
+      },
+      {
+        id: "space_coffee_lines",
+        apiName: "spaceCoffeeLines",
+        question: "Distance between coffee tree lines",
+        instructions: "Please enter value...",
+        type: "single-select",
+        options: ["2 by 2.5 meters", "2 by 1.5 meters", "Others"],
+        loopHeadingQuestionId: "plot",
+        validationRule: 7,
+        conditions: {
+          showIf: "Others",
+          nextQuestionId: "space_coffee_lines_other",
+          elseQuestionId: "plot_pay",
+        },
+        prevQuestionId: "space_coffee_trees",
+      },
+      {
+        id: "space_coffee_lines_other",
+        apiName: "spaceCoffeeLinesOther",
+        question: "Others specify",
+        loopHeadingQuestionId: "plot",
+        instructions: "Please enter value...",
+        type: "text",
+        validationRule: 7,
+        prevQuestionId: "space_coffee_lines",
+        nextQuestionId: "plot_pay",
+      },
+      {
+        id: "plot_pay",
+        apiName: "plotPay",
+        question: "Do you pay for the plot?",
+        instructions:
+          "If regular payments for the plot, be it for rental, for mortgage/credit payment, contribution for the family, etc., occur.",
+        loopHeadingQuestionId: "plot",
+        type: "single-select",
+        options: ["Yes", "No"],
+        validationRule: 7,
+        prevQuestionId: "space_coffee_lines",
+        conditions: {
+          showIf: "Yes",
+          nextQuestionId: "plot_pay_value",
+          elseQuestionId: null,
+        },
+      },
+      {
+        id: "plot_pay_value",
+        apiName: "plotPayValue",
+        question: "Payment for plot (Burundian Franc)",
+        instructions:
+          "If you make any regular payments for the plot, be it for rental, for mortgage/credit payment, contribution for the family, etc, please include the amount here. If you make any in-kind payments for the use of the plot, please estimate the value of that and put it here.",
+        loopHeadingQuestionId: "plot",
+        type: "number",
+        validationRule: 7,
+        prevQuestionId: "plot_pay",
+        nextQuestionId: "plot_pay_frequency",
+      },
+      {
+        id: "plot_pay_frequency",
+        apiName: "plotPayFrequency",
+        question: "Plot land payment frequency",
+        instructions: "Select Value...",
+        loopHeadingQuestionId: "plot",
+        type: "single-select",
+        options: [
+          "Weekly",
+          "Monthly",
+          "Quarterly",
+          "Semester",
+          "Year/ Harvest",
+        ],
+        validationRule: 7,
+        prevQuestionId: "plot_pay_value",
         nextQuestionId: null,
       },
     ],
