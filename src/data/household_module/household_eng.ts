@@ -1571,7 +1571,7 @@ export const activity_module_questions: QuestionTypeDynamic[] = [
   },
   {
     id: "activity",
-    apiName: "activity",
+    apiName: "activityType",
     question: "Please select activity",
     instructions: "Select the activity done",
     type: "single-select",
@@ -1628,12 +1628,12 @@ export const activity_module_questions: QuestionTypeDynamic[] = [
       "https://pwa-api.brainstacktechnologies.com/api/v1/household/members",
     validationRule: 7,
     prevQuestionId: "activity_who_hh_select",
-    loopQuestionsResponseKey: "activityWhoHh",
+    loopQuestionsResponseKey: "activityUsers",
     conditionalLoopKeyName: "householdMemberName",
     questionsToRepeat: [
       {
         id: "labor",
-        apiName: "labor",
+        apiName: "totalHrsSpent",
         question: "HOURS worked by household member in the activity",
         instructions:
           "For the selected day, specify how many HOURS were worked by each houseold member WITHOUT REMUNERATION. For any of these activities, please consider the time spent for preparing for the activity, doing the actual activity, etc.",
@@ -1652,7 +1652,7 @@ export const activity_module_questions: QuestionTypeDynamic[] = [
     question: "Who else did this activity today?",
     instructions: "Please select all that apply...",
     type: "multi-select-conditional",
-    options: ["Permanent hired labor", "Temporary/ casual hired labor"],
+    options: ["Permanent hired labor", "Temporary/ casual hired labor", "None"],
     validationRule: 7,
     prevQuestionId: "activity",
     nextQuestionId: "submit_survey",

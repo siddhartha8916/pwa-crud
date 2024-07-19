@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import {
   household_module_questions,
-  // household_module_questions,
   QuestionToRepeat,
   QuestionTypeDynamic,
 } from "@/data/household_module/household_eng";
@@ -22,7 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { I_AddSurveyBody, Option } from "@/types/user";
-import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 import AppFormReactSelect from "@/components/common/app-form-react-select";
 import { useState } from "react";
 import { modifiedResponseData } from "@/lib/validate-response";
@@ -34,6 +32,7 @@ import {
   handleKeyDown,
   requestGeolocationPermission,
 } from "@/lib/utils";
+import AppCreateableReactSelect from "@/components/common/app-createable-react-select";
 
 let newMultiSelectQuestions: QuestionTypeDynamic[] = [];
 
@@ -201,6 +200,21 @@ const HouseholdModuleDynamicQuestionnaire = () => {
   ) => {
     switch (question.type) {
       case "number":
+        return (
+          <Input
+            id={question.apiName.toString()}
+            value={(responsesData[question.apiName] as string) || ""}
+            onChange={(event) =>
+              handleInputChange(
+                question.apiName,
+                event.target.value,
+                setResponseData
+              )
+            }
+            type="number"
+            onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
+          />
+        );
       case "text":
         return (
           <Input
@@ -213,6 +227,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
                 setResponseData
               )
             }
+            type="text"
             onKeyDown={(event) => handleKeyDown(event, question.validationRule)}
           />
         );
@@ -269,7 +284,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
         }
 
         return (
-          <AppFormReactSelect
+          <AppCreateableReactSelect
             options={questionOptions || []}
             label=""
             isOptionsLoading={false}
@@ -314,6 +329,34 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       case "multi-select-conditional":
         if (!questionOptions) {
           handleOptions(question, "multi-select-conditional", responsesData);
+        }
+
+        return (
+          <AppCreateableReactSelect
+            options={questionOptions || []}
+            label=""
+            isOptionsLoading={false}
+            placeholder={question.question}
+            selectType="multi"
+            direction="column"
+            className="col-span-2 -mt-1"
+            selected={
+              responsesData[question.apiName]
+                ? (responsesData[question.apiName] as Option[])
+                : null
+            }
+            setSelected={(value) => {
+              handleInputChange(question.apiName, value, setResponseData);
+            }}
+          />
+        );
+      case "multi-select-conditional-loop":
+        if (!questionOptions) {
+          handleOptions(
+            question,
+            "multi-select-conditional-loop",
+            responsesData
+          );
         }
 
         return (
@@ -424,6 +467,18 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       return;
     }
 
+    if (
+      question.type === "multi-select-conditional-loop" &&
+      question.questionsToRepeat &&
+      !responses[question.loopQuestionsResponseKey!]
+    ) {
+      setRepeatCount(0);
+      setRepeatQuestions(question?.questionsToRepeat);
+      setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
+      setOpen(true);
+      return;
+    }
+
     // Dont do anything if next question id is null
     if (!question?.nextQuestionId && !question?.conditions?.nextQuestionId) {
       return;
@@ -433,8 +488,7 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       question.questionsToRepeat &&
       !responses[question.loopQuestionsResponseKey!]
     ) {
-      console.log("running :>> ", question);
-      setRepeatCount(responses[question.apiName] as number);
+      setRepeatCount(0);
       setRepeatQuestions(question?.questionsToRepeat);
       setCurrentRepeatQuestion(question?.questionsToRepeat?.[0]);
       setOpen(true);
@@ -715,14 +769,18 @@ const HouseholdModuleDynamicQuestionnaire = () => {
       item.loopHeadingQuestionId ===
       currentRepeatQuestion?.loopHeadingQuestionId
   );
-  const loopHeadingText = repeatQuestionsResponse[
-    loopHeadingQuestion?.apiName as string
-  ] as string;
+
+  const loopHeadingText =
+    currentRepeatQuestion?.loopHeadingQuestionId === "-"
+      ? (responses[currentQuestion.apiName] as Option[])[repeatCount].value
+      : (repeatQuestionsResponse[
+          loopHeadingQuestion?.apiName as string
+        ] as string);
 
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium">Household Dynamic Questionnaire</h2>
+        <h2 className="text-lg font-medium">Activity Dynamic Questionnaire</h2>
         {household_module_questions.findIndex(
           (quest) => quest.id === currentQuestion.id
         ) + 1}{" "}
